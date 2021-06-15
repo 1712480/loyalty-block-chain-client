@@ -1,0 +1,27 @@
+@import './Button.module';
+@import './Input.module';
+
+.container {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.button-dimension {
+  width: 100%;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.form {
+  display: flex;
+  min-width: 300px;
+  flex-direction: column;
+}

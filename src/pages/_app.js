@@ -1,12 +1,12 @@
-import LayoutContainer from '../LayoutContainer';
+import Layout from '../Layout';
 
 import '../../styles/globals.css'
 
 function MyApp({ Component, pageProps }) {
   return (
-    <LayoutContainer>
+    <Layout>
       <Component {...pageProps} />
-    </LayoutContainer>
+    </Layout>
   )
 }
 

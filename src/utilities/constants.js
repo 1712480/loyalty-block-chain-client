@@ -22,3 +22,5 @@ export const WORKER_EVENT = {
   MINE_SUCCEED: 'MINE_SUCCEED',
   MINE_FAILED: 'MINE_FAILED',
 }
+
+export const EMPTY = 'empty';
