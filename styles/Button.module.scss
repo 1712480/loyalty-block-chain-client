@@ -1,0 +1,26 @@
+.button {
+  font-size: 1rem;
+  padding: 0.5rem;
+
+  border: none;
+  border-radius: 0.5rem;
+
+  color: white;
+  background-color: black;
+  transition: background-color ease 0.1s;
+
+  &:hover {
+    cursor: pointer;
+    background-color: #494949;
+  }
+
+  &:active, &:focus-visible {
+    outline: none;
+    background-color: #929292;
+  }
+
+  &:disabled {
+    background-color: #929292;
+    cursor: default;
+  }
+}
