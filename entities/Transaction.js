@@ -4,35 +4,29 @@ import { ec as EC } from 'elliptic';
 import Chain from './Chain';
 
 class Transaction {
-  public amount: number;
-  public timestamp: number;
-  public toAddress: string;
-  public fromAddress: string;
-  public signature: string;
   static ec = new EC('secp256k1');
 
-
-  constructor(fromAddress: string, toAddress: string, amount: number) {
+  constructor(fromAddress, toAddress, amount) {
     this.amount = amount;
     this.toAddress = toAddress;
     this.timestamp = Date.now();
     this.fromAddress = fromAddress;
   };
 
-  static calculateHash(transaction: Transaction) {
+  static calculateHash(transaction) {
     return createHash('SHA256')
       .update(transaction.fromAddress + transaction.toAddress + transaction.amount + transaction.timestamp)
       .digest('hex');
   };
 
-  static signTransaction(transaction: Transaction, privateKey: string) {
+  static signTransaction(transaction, privateKey) {
     const hashTx = Transaction.calculateHash(transaction);
     const keyPair = this.ec.keyFromPrivate(privateKey, 'hex');
     const signature = keyPair.sign(hashTx, 'base64');
     transaction.signature = signature.toDER('hex');
   };
 
-  static isValid(transaction: Transaction) {
+  static isValid(transaction) {
     // This is a reward transaction
     if (transaction.fromAddress === null) return true;
 

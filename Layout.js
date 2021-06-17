@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { ToastContainer, Zoom } from 'react-toastify';
 
-import styles from '../styles/Layout.module.scss';
+import styles from './styles/Layout.module.scss';
 
 const Layout = ({ children }) => {
   return (

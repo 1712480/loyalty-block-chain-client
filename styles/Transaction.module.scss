@@ -1,0 +1,59 @@
+@import 'button.module';
+@import 'input.module';
+
+.container {
+  display: flex;
+  overflow: auto;
+  min-width: 300px;
+  text-align: center;
+  flex-direction: column;
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .button-dimension {
+    width: 100%;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
+}
+
+.history {
+  flex: 1;
+  display: flex;
+  margin: 1rem 0;
+  overflow: auto;
+  flex-direction: column;
+
+  .item {
+    border: none;
+    margin: 0.5rem 0;
+    border-radius: 5px;
+
+    p {
+      max-width: 250px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    &.reward {
+      color: white;
+      background-color: #55a1fa;
+    }
+
+    &.transfer {
+      color: white;
+      background-color: #ff8d8d;
+    }
+
+    &.receive {
+      background-color: #aeff9f;
+    }
+  }
+}
+

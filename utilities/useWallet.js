@@ -21,5 +21,5 @@ export default ({ redirectTo = false }) => {
     }
   }, [credentials, redirectTo]);
 
-  return credentials;
+  return [credentials, setCredentials];
 };

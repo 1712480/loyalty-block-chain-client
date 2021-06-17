@@ -6,7 +6,7 @@ import { saveAs } from 'file-saver';
 import classNames from 'classnames';
 import { toast } from 'react-toastify';
 
-import styles from '../../styles/Login.module.scss';
+import styles from '../styles/Login.module.scss';
 
 const generator = new ec('secp256k1');
 const key = generator.genKeyPair();

@@ -3,13 +3,7 @@ import crypto from 'crypto';
 import Transaction from './Transaction';
 
 class Block {
-  public hash;
-  public nonce;
-  public prevHash;
-  public timeStamp;
-  public transactions;
-
-  constructor(prevHash: string, hash: string, transactions: Transaction[], timeStamp: number, nonce: number) {
+  constructor(prevHash, hash, transactions, timeStamp, nonce) {
     this.hash = hash;
     this.nonce = nonce;
     this.prevHash = prevHash;
@@ -18,7 +12,7 @@ class Block {
   }
 }
 
-export const hashBlock = (prevHash: string, transactions: Transaction[], nonce: number) => {
+export const hashBlock = (prevHash, transactions, nonce) => {
   const hashData = prevHash + JSON.stringify(transactions) + nonce;
   const hash = crypto.createHash('SHA256');
 

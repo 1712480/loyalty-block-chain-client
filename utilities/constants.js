@@ -15,6 +15,11 @@ export const SOCKET_CLIENT_EVENT = {
   USER_DISCONNECTED: 'user-disconnected',
   NEW_TRANSACTION: 'new-transaction',
   UPDATE: 'update-data',
+  VERIFIED: 'verified',
+  WELCOME_USER: 'welcome',
+  DISCONNECT: 'disconnect',
+  REQUEST_VERIFY: 'request-verify',
+  BROAD_CAST_NEW_BLOCK: 'new-block',
 };
 
 export const WORKER_EVENT = {

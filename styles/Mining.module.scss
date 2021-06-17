@@ -1,0 +1,41 @@
+@import 'Button.module';
+@import 'Input.module';
+
+.container {
+  width: 500px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.button-dimension {
+  width: 100%;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.overlay {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  animation-duration: 0.3s;
+  animation-timing-function: linear;
+  background: rgba(232, 232, 232, 0.7);
+
+  &.fade-in {
+    opacity: 1;
+    display: flex;
+    animation-name: frame-in;
+  }
+
+  &.fade-out {
+    opacity: 0;
+    animation-name: frame-out;
+  }
+}

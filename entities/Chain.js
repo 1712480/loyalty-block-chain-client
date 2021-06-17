@@ -7,11 +7,11 @@ class Chain {
   static genesisHash = 'genesis-block';
   static genesisPrevHash = 'genesis-block-prev-hash';
 
-  static setChain(chain: Block[]) {
+  static setChain(chain) {
     this.instance = chain;
   };
 
-  static isValidChain(chain: Block[]) {
+  static isValidChain(chain) {
     const genesisBlock = chain[0];
 
     if (
@@ -33,7 +33,7 @@ class Chain {
     }
   };
 
-  static getAllTransactionForAddress (publicKey: string) {
+  static getAllTransactionForAddress (publicKey) {
     const txs = [];
 
     for (let block of this.instance) {
@@ -45,7 +45,7 @@ class Chain {
     return txs;
   };
 
-  static getBalanceOfAddress(publicKey: string) {
+  static getBalanceOfAddress(publicKey) {
     let balance = 0;
 
     for (let block of Chain.instance) {
@@ -58,3 +58,5 @@ class Chain {
     return balance;
   };
 }
+
+export default Chain;

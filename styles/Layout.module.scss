@@ -1,3 +1,6 @@
+@import 'Button.module';
+@import 'Input.module';
+
 .container {
   min-height: 100vh;
   padding: 0 0.5rem;
@@ -48,7 +51,7 @@
 .title {
   margin: 0;
   line-height: 1.15;
-  font-size: 4rem;
+  font-size: 3rem;
 }
 
 .title,
@@ -118,5 +121,26 @@
   .grid {
     width: 100%;
     flex-direction: column;
+  }
+}
+
+.button-dimension {
+  width: 100%;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.content {
+  width: 500px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+
+  p {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

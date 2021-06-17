@@ -27,11 +27,11 @@ module.exports = {
       }
     });
 
-    // // Fix service worker didn't being export properly
-    // config.output.chunkFilename = isServer
-    //   ? `${dev ? "[name]" : "[name].[fullhash]"}.js`
-    //   : `static/chunks/${dev ? "[name]" : "[name].[fullhash]"}.js`;
-    // config.output.hotUpdateMainFilename = `[runtime]-[id]-wps-hmr.js`
+    // Fix service worker didn't being export properly
+    config.output.chunkFilename = isServer
+      ? `${dev ? "[name]" : "[name].[fullhash]"}.js`
+      : `static/chunks/${dev ? "[name]" : "[name].[fullhash]"}.js`;
+    config.output.hotUpdateMainFilename = `[runtime]-[id]-wps-hmr.js`
     return config;
   },
 };
