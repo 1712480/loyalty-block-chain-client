@@ -1,7 +1,9 @@
 import { get } from 'lodash';
-import Chain from '../entities/Chain';
-import Block, { hashBlock } from '../entities/Block';
+import crypto from 'crypto';
+
 import { WORKER_EVENT } from './constants';
+
+const difficulty = 4;
 
 addEventListener('install', () => {
   console.log('[Worker]: 👷 Proof of work worker installed');
@@ -30,9 +32,15 @@ const mineNewBlock = (pendingTransaction, prevHash) => {
   while (true) {
     const hash = hashBlock(prevHash, pendingTransaction, nonce);
 
-    if (hash.substr(0, Chain.difficulty) === Array(Chain.difficulty + 1).join('0')) {
+    if (hash.substr(0, difficulty) === Array(difficulty + 1).join('0')) {
       console.log(`[Worker]: ⛏️ mined succeed nonce: ${nonce}`);
-      return new Block(prevHash, hash, pendingTransaction, Date.now(), nonce);
+      return ({
+        prevHash,
+        hash,
+        transactions: pendingTransaction,
+        timeStamp: Date.now(),
+        nonce,
+      })
     }
 
     nonce += 1;
@@ -40,3 +48,10 @@ const mineNewBlock = (pendingTransaction, prevHash) => {
 
 };
 
+export const hashBlock = (prevHash, transactions, nonce) => {
+  const hashData = prevHash + JSON.stringify(transactions) + nonce;
+  const hash = crypto.createHash('SHA256');
+
+  hash.update(hashData).end();
+  return hash.digest('hex');
+}

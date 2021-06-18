@@ -14,7 +14,7 @@ export const SERVER_ENDPOINT = {
 export const SOCKET_CLIENT_EVENT = {
   USER_DISCONNECTED: 'user-disconnected',
   NEW_TRANSACTION: 'new-transaction',
-  UPDATE: 'update-data',
+  UPDATE_ALL: 'update-all',
   VERIFIED: 'verified',
   WELCOME_USER: 'welcome',
   DISCONNECT: 'disconnect',

@@ -16,21 +16,24 @@ import css from '../styles/Transaction.module.scss';
 const Transaction = ({ router }) => {
   const amount = useRef(null);
   const [balance, setBalance] = useState(0);
-  const [loaded, setLoaded] = useState(false);
+  const [connected, setConnected] = useState(false);
   const receiverAddress = useRef(null);
-  const wallet = useWallet({ redirectTo: 'login' });
+  const [wallet] = useWallet({ redirectTo: 'login' });
 
   useEffect(() => {
-    if (wallet) {
-      socket.emit(SOCKET_CLIENT_EVENT.UPDATE);
-      socket.on(SOCKET_CLIENT_EVENT.UPDATE, ({ chain }) => {
-        Chain.setChain(chain);
-        const calculatedBalance = Chain.getBalanceOfAddress(wallet.publicKey);
-        setBalance(calculatedBalance);
-        setLoaded(true);
-      });
+    socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
+    socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, (data) => {
+      const chain = get(data, 'chain') || [];
+      Chain.setChain(chain);
+      setConnected(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (wallet && wallet.publicKey && connected) {
+      setBalance(Chain.getBalanceOfAddress(wallet.publicKey));
     }
-  }, [wallet]);
+  }, [connected]);
 
   const goBack = () => router.push('/');
 
@@ -55,7 +58,7 @@ const Transaction = ({ router }) => {
     // }
   };
 
-  return loaded ? (
+  return connected ? (
     <div className={css.container}>
       <h1>Transaction</h1>
       <h4>Balance: {balance}</h4>

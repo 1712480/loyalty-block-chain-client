@@ -27,37 +27,41 @@ const Mining = ({ router }) => {
   const [enableMining, setEnableMining] = useState(false);
 
   useEffect(() => {
-    // return () => {
-    //   worker.current.terminate();
-    // }
+    worker.current = new Worker(new URL('../utilities/mine.worker.js', import.meta.url))
+
+    worker.current.onmessage = (event) => {
+      const message = get(event, 'data[0]', '');
+      const data = get(event, 'data[1]', {});
+
+      if (message === WORKER_EVENT.MINE_SUCCEED) {
+        setAnimationName(css.fadeOut);
+        socket.emit(SOCKET_CLIENT_EVENT.REQUEST_VERIFY, data);
+        toast.success('Mined new block succeed, waiting for verification');
+      }
+
+      if (message === WORKER_EVENT.MINE_FAILED) {
+        setAnimationName(css.fadeOut);
+        toast.error('Transaction(s) invalid');
+      }
+    };
+
+    worker.current.onerror = (event) => {
+      console.log({ workerError: event });
+    };
+
+    worker.current.postMessage('hello')
+
+    return () => {
+      worker.current.terminate();
+    }
   }, []);
 
   useEffect(() => {
     if (credential) {
-      socket.emit(SOCKET_CLIENT_EVENT.UPDATE);
-      socket.on(SOCKET_CLIENT_EVENT.UPDATE, (data) => handleNewChain(data));
+      socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
+      socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, (data) => handleNewChain(data));
 
-      // worker.current = new Worker(new URL('utilities/mine.worker.js', import.meta.url));
-      //
-      // worker.current.onmessage = (event) => {
-      //   const message = get(event, 'data[0]', '');
-      //   const data = get(event, 'data[1]', {});
-      //
-      //   if (message === WORKER_EVENT.MINE_SUCCEED) {
-      //     setAnimationName(css.fadeOut);
-      //     socket.emit(SOCKET_CLIENT_EVENT.REQUEST_VERIFY, data);
-      //     toast.success('Mined new block succeed, waiting for verification');
-      //   }
-      //
-      //   if (message === WORKER_EVENT.MINE_FAILED) {
-      //     setAnimationName(css.fadeOut);
-      //     toast.error('Transaction(s) invalid');
-      //   }
-      // };
-      //
-      // worker.current.onerror = (event) => {
-      //   console.log({ workerError: event });
-      // };
+
     }
   }, [credential]);
 

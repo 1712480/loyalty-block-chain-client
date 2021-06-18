@@ -1,14 +1,15 @@
-import Block, { hashBlock } from './Block';
-
 class Chain {
-  static instance;
   static difficulty = 4;
   static genesisNonce = 123456789;
   static genesisHash = 'genesis-block';
   static genesisPrevHash = 'genesis-block-prev-hash';
 
-  static setChain(chain) {
-    this.instance = chain;
+  constructor() {
+    this.chain = [];
+  }
+
+  setChain(chain) {
+    this.chain = chain;
   };
 
   static isValidChain(chain) {
@@ -22,21 +23,21 @@ class Chain {
       return false;
     }
 
-    for (let i = 1; i < chain.length; i++) {
-      const currentBlock = chain[i];
-      const prevBlock = chain[i - 1];
-      const blockHash = hashBlock(currentBlock.prevHash, currentBlock.transactions, currentBlock.nonce);
-
-      return !(blockHash.substr(0, Chain.difficulty) !== Array(Chain.difficulty + 1).join('0')
-        || blockHash !== currentBlock.hash
-        || currentBlock.prevHash !== prevBlock.hash);
-    }
+    // for (let i = 1; i < chain.length; i++) {
+    //   const currentBlock = chain[i];
+    //   const prevBlock = chain[i - 1];
+    //   const blockHash = hashBlock(currentBlock.prevHash, currentBlock.transactions, currentBlock.nonce);
+    //
+    //   return !(blockHash.substr(0, Chain.difficulty) !== Array(Chain.difficulty + 1).join('0')
+    //     || blockHash !== currentBlock.hash
+    //     || currentBlock.prevHash !== prevBlock.hash);
+    // }
   };
 
-  static getAllTransactionForAddress (publicKey) {
+  getAllTransactionForAddress (publicKey) {
     const txs = [];
 
-    for (let block of this.instance) {
+    for (let block of this.chain) {
       for (let tx of block.transactions) {
         if (tx.toAddress === publicKey || tx.fromAddress === publicKey) txs.push(tx);
       }
@@ -45,10 +46,10 @@ class Chain {
     return txs;
   };
 
-  static getBalanceOfAddress(publicKey) {
+  getBalanceOfAddress(publicKey) {
     let balance = 0;
 
-    for (let block of Chain.instance) {
+    for (let block of this.chain) {
       for (let tx of block.transactions) {
         if (tx.toAddress === publicKey) balance += tx.amount;
         if (tx.fromAddress === publicKey) balance -= tx.amount;
@@ -59,4 +60,4 @@ class Chain {
   };
 }
 
-export default Chain;
+export default new Chain();

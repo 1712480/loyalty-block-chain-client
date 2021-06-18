@@ -1,7 +1,5 @@
 import crypto from 'crypto';
 
-import Transaction from './Transaction';
-
 class Block {
   constructor(prevHash, hash, transactions, timeStamp, nonce) {
     this.hash = hash;
