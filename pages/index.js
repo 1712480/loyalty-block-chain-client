@@ -22,10 +22,6 @@ const Home = ({ router }) => {
       Chain.setChain(chain);
       setConnected(true);
     });
-
-    return () => {
-      socket.emit(SOCKET_CLIENT_EVENT.USER_DISCONNECTED);
-    }
   }, []);
 
   useEffect(() => {
@@ -39,6 +35,7 @@ const Home = ({ router }) => {
   }
 
   const exit = () => {
+    socket.emit(SOCKET_CLIENT_EVENT.USER_DISCONNECTED);
     localStorage.removeItem('credentials');
     setCredentials(EMPTY);
   }

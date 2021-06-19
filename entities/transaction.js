@@ -23,7 +23,11 @@ class Transaction {
     const hashTx = Transaction.calculateHash(transaction);
     const keyPair = this.ec.keyFromPrivate(privateKey, 'hex');
     const signature = keyPair.sign(hashTx, 'base64');
-    transaction.signature = signature.toDER('hex');
+
+    return {
+      ...transaction,
+      signature: signature.toDER('hex')
+    }
   };
 
   static isValid(transaction) {

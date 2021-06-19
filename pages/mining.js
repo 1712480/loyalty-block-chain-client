@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { withRouter } from 'next/router'
 import classNames from 'classnames';
 import { toast } from 'react-toastify';
-import PuffLoader from 'react-spinners/PuffLoader';
 
 import Chain from '../entities/chain';
 import Transaction from '../entities/transaction';
@@ -15,10 +14,11 @@ import useWallet from "../utilities/useWallet";
 
 const Mining = ({ router }) => {
   const worker = useRef(null);
-  const credential = useWallet({ redirectTo: 'login' });
+  const [credential] = useWallet({ redirectTo: 'login' });
 
   const [loaded, setLoaded] = useState(false);
   const [animationName, setAnimationName] = useState('');
+  const [workerInstalled, setWorkerInstalled] = useState(false);
 
   const [pendingBlock, setPendingBlock] = useState(null);
   const [pendingTransactions, setPendingTransactions] = useState([]);
@@ -27,6 +27,9 @@ const Mining = ({ router }) => {
   const [enableMining, setEnableMining] = useState(false);
 
   useEffect(() => {
+    socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
+    socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, (data) => handleNewData(data));
+
     worker.current = new Worker(new URL('../utilities/mine.worker.js', import.meta.url))
 
     worker.current.onmessage = (event) => {
@@ -35,7 +38,7 @@ const Mining = ({ router }) => {
 
       if (message === WORKER_EVENT.MINE_SUCCEED) {
         setAnimationName(css.fadeOut);
-        socket.emit(SOCKET_CLIENT_EVENT.REQUEST_VERIFY, data);
+        socket.emit(SOCKET_CLIENT_EVENT.REQUEST_VERIFY, { block: data });
         toast.success('Mined new block succeed, waiting for verification');
       }
 
@@ -43,32 +46,31 @@ const Mining = ({ router }) => {
         setAnimationName(css.fadeOut);
         toast.error('Transaction(s) invalid');
       }
+
+      if (message === WORKER_EVENT.GREETINGS) {
+        setWorkerInstalled(true);
+      }
     };
 
     worker.current.onerror = (event) => {
       console.log({ workerError: event });
     };
 
-    worker.current.postMessage('hello')
+    worker.current.postMessage([WORKER_EVENT.GREETINGS])
 
     return () => {
       worker.current.terminate();
     }
   }, []);
 
-  useEffect(() => {
-    if (credential) {
-      socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
-      socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, (data) => handleNewChain(data));
+  const handleNewData = (data) => {
+    const newChain = get(data, 'chain') || [];
+    const newTransactions = get(data, 'transactions') || [];
+    const newBlock = get(data, 'block') || null;
 
-
-    }
-  }, [credential]);
-
-  const handleNewChain = ({ chain }) => {
-    Chain.setChain(chain);
-    // setPendingBlock(block);
-    // setPendingTransactions(transactions);
+    Chain.setChain(newChain);
+    setPendingTransactions(newTransactions);
+    setPendingBlock(newBlock);
 
     if (!loaded) setLoaded(true);
   };
@@ -84,8 +86,9 @@ const Mining = ({ router }) => {
 
   const handleVerifyBlock = () => {
     if (pendingBlock) {
-      if (Chain.isValidChain([...Chain.instance, pendingBlock])) {
-        socket.emit(SOCKET_CLIENT_EVENT.VERIFIED, { newBlock: pendingBlock });
+      console.log({initial: Chain.chain})
+      if (Chain.isValidChain([...Chain.chain, pendingBlock])) {
+        socket.emit(SOCKET_CLIENT_EVENT.VERIFIED, { block: pendingBlock });
         toast.success('Block verified as VALID');
       } else {
         toast.error('Block verified as INVALID');
@@ -94,7 +97,7 @@ const Mining = ({ router }) => {
   };
 
   useEffect(() => {
-    if (!!pendingTransactions.length) {
+    if (pendingTransactions && !!pendingTransactions.length) {
       toast.dark('New transaction(s) available for mining.');
       setEnableMining(true);
     } else {
@@ -103,20 +106,20 @@ const Mining = ({ router }) => {
   }, [pendingTransactions]);
 
   const handleMining = () => {
-    if (Chain.instance.length && pendingTransactions.length) {
-      const rewardTransaction = new Transaction(null, params.publicKey, 100);
+    if (Chain.chain.length && pendingTransactions.length) {
+      const rewardTransaction = new Transaction(null, credential.publicKey, 100);
 
       setAnimationName(css.fadeIn);
       worker.current.postMessage([WORKER_EVENT.START_MINING, {
         transactions: [...pendingTransactions, rewardTransaction],
-        lastBlockHash: Chain.instance[Chain.instance.length - 1].hash
+        lastBlockHash: Chain.chain[Chain.chain.length - 1].hash
       }]);
     }
   };
 
   const goBack = () => router.push('/')
 
-  return loaded ? (
+  return workerInstalled && loaded && credential.publicKey ? (
     <div className={css.container}>
       <h1>Mining</h1>
 

@@ -5,14 +5,15 @@ import { WORKER_EVENT } from './constants';
 
 const difficulty = 4;
 
-addEventListener('install', () => {
-  console.log('[Worker]: 👷 Proof of work worker installed');
-});
-
 addEventListener('message', (event) => {
   const message = get(event, 'data[0]');
   const transactions = get(event,'data[1].transactions', []);
   const lastBlockHash = get(event, 'data[1].lastBlockHash', '');
+
+  if (message === WORKER_EVENT.GREETINGS) {
+    console.log('[Worker]: 👷 Proof of work worker installed');
+    postMessage([WORKER_EVENT.GREETINGS]);
+  }
 
   if (message === WORKER_EVENT.START_MINING) {
     console.log('[Worker]: 👷 Received start mining message.');
@@ -48,7 +49,7 @@ const mineNewBlock = (pendingTransaction, prevHash) => {
 
 };
 
-export const hashBlock = (prevHash, transactions, nonce) => {
+const hashBlock = (prevHash, transactions, nonce) => {
   const hashData = prevHash + JSON.stringify(transactions) + nonce;
   const hash = crypto.createHash('SHA256');
 

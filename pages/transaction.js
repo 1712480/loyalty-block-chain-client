@@ -7,7 +7,8 @@ import { withRouter } from 'next/router';
 import PuffLoader from 'react-spinners/PuffLoader';
 import { css as emotionCss } from '@emotion/react';
 
-import Chain from '../entities/chain';
+import chain from '../entities/chain';
+import transaction from '../entities/transaction';
 import { SOCKET_CLIENT_EVENT } from '../utilities/constants';
 import useWallet from "../utilities/useWallet";
 
@@ -23,15 +24,15 @@ const Transaction = ({ router }) => {
   useEffect(() => {
     socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
     socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, (data) => {
-      const chain = get(data, 'chain') || [];
-      Chain.setChain(chain);
+      const newChain = get(data, 'chain') || [];
+      chain.setChain(newChain);
       setConnected(true);
     });
   }, []);
 
   useEffect(() => {
     if (wallet && wallet.publicKey && connected) {
-      setBalance(Chain.getBalanceOfAddress(wallet.publicKey));
+      setBalance(chain.getBalanceOfAddress(wallet.publicKey));
     }
   }, [connected]);
 
@@ -44,18 +45,23 @@ const Transaction = ({ router }) => {
     if (receiverAddress.current.value === wallet.publicKey) return toast.error('Can not send to current wallet');
     if (Number(amount.current.value) >= balance) return toast.error('Amount must be <= balance');
 
-    // try {
-    //   const newTransaction = new transaction(wallet.publicKey, receiverAddress.current.value, Number(amount.current.value));
-    //   transaction.signTransaction(newTransaction, wallet.privateKey);
-    //   socket.emit(SOCKET_CLIENT_EVENT.NEW_TRANSACTION, newTransaction);
-    //
-    //   toast.success('Created transaction');
-    //   amount.current.value = '';
-    //   receiverAddress.current.value = '';
-    // } catch(error) {
-    //   toast.error('Error creating new transaction');
-    //   console.log({ error });
-    // }
+    try {
+      const data = {
+        fromAddress: wallet.publicKey,
+        toAddress: receiverAddress.current.value,
+        amount: Number(amount.current.value),
+        timestamp: Date.now()
+      };
+      const newTransaction = transaction.signTransaction(data, wallet.privateKey);
+      socket.emit(SOCKET_CLIENT_EVENT.NEW_TRANSACTION, { transaction: newTransaction });
+
+      toast.success('Created transaction');
+      amount.current.value = '';
+      receiverAddress.current.value = '';
+    } catch(error) {
+      toast.error('Error creating new transaction');
+      console.log({ error });
+    }
   };
 
   return connected ? (
