@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import { get } from 'lodash';
 import { withRouter } from 'next/router';
 
-import Chain from '../entities/Chain';
+import Chain from '../entities/chain';
 import socket from '../utilities/socket';
 import useWallet from '../utilities/useWallet';
 import { EMPTY, SOCKET_CLIENT_EVENT } from '../utilities/constants';

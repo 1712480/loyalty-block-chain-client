@@ -7,7 +7,7 @@ import { withRouter } from 'next/router';
 import PuffLoader from 'react-spinners/PuffLoader';
 import { css as emotionCss } from '@emotion/react';
 
-import Chain from '../entities/Chain';
+import Chain from '../entities/chain';
 import { SOCKET_CLIENT_EVENT } from '../utilities/constants';
 import useWallet from "../utilities/useWallet";
 

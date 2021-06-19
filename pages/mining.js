@@ -5,8 +5,8 @@ import classNames from 'classnames';
 import { toast } from 'react-toastify';
 import PuffLoader from 'react-spinners/PuffLoader';
 
-import Chain from '../entities/Chain';
-import Transaction from '../entities/Transaction';
+import Chain from '../entities/chain';
+import Transaction from '../entities/transaction';
 import socket from '../utilities/socket';
 import { SOCKET_CLIENT_EVENT, WORKER_EVENT } from '../utilities/constants';
 

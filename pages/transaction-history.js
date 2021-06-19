@@ -1,11 +1,8 @@
 import React, {useState, useEffect } from 'react';
-import { get } from 'lodash';
 import { withRouter } from 'next/router';
 import classNames from 'classnames';
-import PuffLoader from 'react-spinners/PuffLoader';
 
-import Chain from '../Entities/Chain';
-import TransactionEntity from '../Entities/Transaction';
+import Chain from '../entities/chain';
 
 import { SOCKET_CLIENT_EVENT } from '../utilities/constants';
 import css from '../styles/Transaction.module.scss';

@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { ec as EC } from 'elliptic';
 
-import Chain from './Chain';
+import Chain from './chain';
 
 class Transaction {
   static ec = new EC('secp256k1');
