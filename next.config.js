@@ -2,7 +2,7 @@ module.exports = {
   future: {
     webpack5: true,
   },
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { dev, isServer, webpack }) => {
     const { rules } = config.module;
     // Find the array of "style rules" in the webpack config.
     // This is the array of webpack rules that:
@@ -26,6 +26,16 @@ module.exports = {
         cssLoaderConfig.options.modules.exportLocalsConvention = 'camelCase';
       }
     });
+
+    console.log(`Webpack version: ${webpack.version}`);
+
+    config.output.hotUpdateMainFilename =
+      "static/webpack/[fullhash].[runtime].hot-update.json";
+
+    if (!isServer) {
+      config.resolve.fallback.fs = false;
+    }
+
     return config;
   },
 };

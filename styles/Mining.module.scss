@@ -16,17 +16,16 @@
 }
 
 .overlay {
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 50px;
+  left: 50px;
+  width: 100px;
+  height: 100px;
   display: none;
   position: absolute;
   align-items: center;
   justify-content: center;
   animation-duration: 0.3s;
   animation-timing-function: linear;
-  background: rgba(232, 232, 232, 0.7);
 
   &.fade-in {
     opacity: 1;

@@ -23,6 +23,7 @@ const Layout = ({ children }) => {
       <Head>
         <title>Loyalty with BlockChain</title>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="modulepreload" href="/mine.worker.js" />
       </Head>
 
       <main className={styles.main}>

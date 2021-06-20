@@ -1,11 +1,11 @@
 import { get } from 'lodash';
 import crypto from 'crypto';
 
-import { WORKER_EVENT } from './constants';
+import { WORKER_EVENT } from '../utilities/constants';
 
 const difficulty = 4;
 
-addEventListener('message', (event) => {
+onmessage = (event) => {
   const message = get(event, 'data[0]');
   const transactions = get(event,'data[1].transactions', []);
   const lastBlockHash = get(event, 'data[1].lastBlockHash', '');
@@ -25,7 +25,7 @@ addEventListener('message', (event) => {
       postMessage([WORKER_EVENT.MINE_FAILED, error]);
     }
   }
-});
+};
 
 const mineNewBlock = (pendingTransaction, prevHash) => {
   let nonce = 0;

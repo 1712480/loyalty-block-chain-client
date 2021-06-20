@@ -10,7 +10,6 @@ import socket from '../utilities/socket';
 import useWallet from "../utilities/useWallet";
 
 const TransactionHistory = ({ router }) => {
-  const params = router.query;
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [connected, setConnected] = useState(false);
@@ -20,7 +19,6 @@ const TransactionHistory = ({ router }) => {
     socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
     socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, ({ chain }) => {
       Chain.setChain(chain);
-
       setConnected(true);
     });
   }, []);
@@ -43,7 +41,7 @@ const TransactionHistory = ({ router }) => {
         </div>
       );
 
-      const isTransfer = transaction.fromAddress === params.publicKey;
+      const isTransfer = transaction.fromAddress === wallet.publicKey;
       const style = isTransfer ? css.transfer : css.receive
 
       return (

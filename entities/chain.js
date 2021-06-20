@@ -16,7 +16,7 @@ class Chain {
 
   isValidChain(chain) {
     const genesisBlock = chain[0];
-console.log(chain)
+
     if (
       genesisBlock.nonce !== Chain.genesisNonce
       || genesisBlock.hash !== Chain.genesisHash

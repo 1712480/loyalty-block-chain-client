@@ -3,7 +3,7 @@ import Router from 'next/router'
 
 import { EMPTY } from './constants';
 
-export default ({ redirectTo = false }) => {
+const useWallet = ({ redirectTo = false }) => {
   const [credentials, setCredentials] = useState(null);
 
   useEffect(() => {
@@ -23,3 +23,5 @@ export default ({ redirectTo = false }) => {
 
   return [credentials, setCredentials];
 };
+
+export default useWallet;
