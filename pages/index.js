@@ -45,7 +45,7 @@ const Home = ({ router }) => {
       <h1 className={styles.title}>
         Loyalty Exchange!
       </h1>
-      <p>Welcome, {wallet.publicKey}</p>
+      <p>Welcome{wallet.name && `, ${wallet.name}`}</p>
 
       <h4>Balance: {balance}</h4>
       <button className={classnames(styles.button, styles.buttonDimension)} onClick={() => router.push('/mining')}>Start mining</button>

@@ -140,7 +140,8 @@
   p {
     width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-align: center;
     white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { get } from 'lodash';
 import { ec } from 'elliptic';
 import Router from 'next/router';
@@ -12,9 +12,12 @@ const generator = new ec('secp256k1');
 const key = generator.genKeyPair();
 
 export default function Login() {
+  const userName = useRef(null);
   const fileInput = useRef(null);
   const publicKeyField = useRef(null);
   const privateKeyField = useRef(null);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [modalAnimation, setModalAnimation] = useState(styles.hide);
 
   const handleSelectedCredentialFile = (event) => {
     const file = get(event, 'target.files[0]');
@@ -23,13 +26,20 @@ export default function Login() {
     reader.readAsText(file, 'UTF-8');
     reader.onload = async (readerEvent) => {
       const content = readerEvent.target.result;
-      const { publicKey, privateKey } = JSON.parse(content);
+      const { publicKey, privateKey, name } = JSON.parse(content);
 
-      localStorage.setItem('credentials', JSON.stringify({ publicKey, privateKey }));
+      localStorage.setItem('credentials', JSON.stringify({ publicKey, privateKey, name }));
       await Router.push('/');
     };
   };
 
+  const toggleModal = (openModal) => {
+    if (openModal && initialLoad) {
+      setInitialLoad(false);
+    }
+
+    setModalAnimation(openModal ? styles.fadeIn : styles.fadeOut);
+  }
   const toggleFileDialog = () => fileInput.current.click();
 
   const handleSubmit = async (event) => {
@@ -48,14 +58,16 @@ export default function Login() {
 
   const handleCreateWallet = async () => {
     try {
+      const name = userName.current.value;
       const publicKey = key.getPublic('hex');
       const privateKey = key.getPrivate('hex');
-      const dataToSave = JSON.stringify({ publicKey, privateKey });
+      const dataToSave = JSON.stringify({ publicKey, privateKey, name });
       const credentialFile = new Blob([dataToSave], {
         type: 'text/plain;charset=utf-8',
       });
 
       saveAs(credentialFile, 'Credential.txt');
+      toggleModal(false);
     } catch (err) {
       console.log({ err });
     }
@@ -87,7 +99,7 @@ export default function Login() {
         </button>
 
         <button
-          onClick={handleCreateWallet}
+          onClick={() => toggleModal(true)}
           className={classNames(styles.button, styles.buttonDimension)}
           type="button"
         >
@@ -109,6 +121,30 @@ export default function Login() {
           type="file"
           ref={fileInput}
         />
+
+        <div className={classNames(styles.modal, modalAnimation)}>
+          <div className={classNames(styles.content)}>
+            <h3>How can we call you</h3>
+
+            <input ref={userName} type="text" className={styles.input} placeholder="your name ..." />
+
+            <button
+              type="button"
+              onClick={handleCreateWallet}
+              className={classNames(styles.button, styles.buttonDimension)}
+            >
+              Submit
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleModal(false)}
+              className={classNames(styles.button, styles.buttonDimension)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );
