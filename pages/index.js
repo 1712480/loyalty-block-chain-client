@@ -38,9 +38,8 @@ const Home = ({ router }) => {
 
   const copyPublicKey = () => {
     const input = document.getElementById('publicKey');
-    input.select();
     navigator.clipboard.writeText(input.value).then(() => {
-      toast.dark('Public-key copied');
+      toast.success('Public-key copied');
     })
       .catch((error) => {
         toast.error('Can\'t copy, try again later.');

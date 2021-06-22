@@ -1,4 +1,4 @@
-import React, { FormEvent, useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { get } from 'lodash';
 import classNames from 'classnames';
 import { toast } from 'react-toastify';
@@ -8,9 +8,9 @@ import PuffLoader from 'react-spinners/PuffLoader';
 import { css as emotionCss } from '@emotion/react';
 
 import chain from '../entities/chain';
+import useWallet from '../utilities/useWallet';
 import transaction from '../entities/transaction';
 import { SOCKET_CLIENT_EVENT } from '../utilities/constants';
-import useWallet from "../utilities/useWallet";
 
 import css from '../styles/Transaction.module.scss';
 

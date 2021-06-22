@@ -3,7 +3,6 @@
 
 .container {
   min-height: 100vh;
-  padding: 0 0.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -16,6 +15,7 @@
   width: 100%;
   height: 100%;
   display: flex;
+  position: relative;
   align-items: center;
   flex-direction: column;
   justify-content: center;
@@ -74,12 +74,47 @@
 }
 
 .grid {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  max-width: 800px;
-  margin-top: 3rem;
+  left: 100%;
+  bottom: 2rem;
+  display: grid;
+  padding: 1rem;
+  grid-gap: 1rem;
+  position: absolute;
+  border-radius: 5px;
+  grid-auto-rows: 80px;
+  border: 1px solid black;
+  grid-template-columns: 80px 80px;
+  transition: all ease-out 0.5s;
+
+  img {
+    width: 80px;
+    cursor: pointer;
+    transition: all ease 0.1s;
+    box-shadow: 0 0 10px -5px #000000;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  button {
+    border: 0;
+    bottom: 2rem;
+    font-size: 2rem;
+    cursor: pointer;
+    position: absolute;
+    background-color: white;
+    right: calc(100% + 0.5rem);
+    transition: all ease 0.1s;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &.open {
+    left: calc(100% - 160px - 4rem);
+  }
 }
 
 .card {
