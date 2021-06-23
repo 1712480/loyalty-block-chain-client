@@ -1,6 +1,6 @@
 const HOST = {
   development: 'http://localhost:8080',
-  production: 'https://loyalty-block-chain.herokuapp.com',
+  production: 'https://loyalty-block-chain-server.herokuapp.com',
 };
 
 export const SERVER_ADDRESS = HOST[process.env.NODE_ENV];
