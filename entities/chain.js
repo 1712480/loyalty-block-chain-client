@@ -1,4 +1,5 @@
-import crypto from "crypto";
+import crypto from 'crypto';
+import Transaction from './transaction';
 
 class Chain {
   static difficulty = 4;
@@ -28,9 +29,17 @@ class Chain {
     for (let i = 1; i < chain.length; i++) {
       const currentBlock = chain[i];
 
+      // TODO: find other way to by pass system reward
       if (currentBlock.hash.length !== Chain.difficulty) {
         const prevBlock = chain[i - 1];
         const blockHash = hashBlock(currentBlock.prevHash, currentBlock.transactions, currentBlock.nonce);
+
+        currentBlock.transactions.forEach(transaction => {
+          if (!Transaction.isValid(transaction)) {
+            console.log('invalid transaction');
+            return false;
+          }
+        })
 
         if (
           blockHash.substr(0, Chain.difficulty) !== Array(Chain.difficulty + 1).join('0')
@@ -38,7 +47,6 @@ class Chain {
           || currentBlock.prevHash !== prevBlock.hash
         ) {
           console.log(currentBlock.prevHash, prevBlock.hash)
-
           return false;
         }
       }

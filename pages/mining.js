@@ -92,6 +92,7 @@ const Mining = ({ router }) => {
   const requestUpdate = () => socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
 
   const handleNewData = (data) => {
+    console.log('new data', data);
     const newChain = get(data, 'chain') || [];
     const newTransactions = get(data, 'transactions') || [];
     const newBlock = get(data, 'block') || null;
@@ -119,6 +120,7 @@ const Mining = ({ router }) => {
   };
 
   const handleVerifyBlock = () => {
+    console.log('verify', Chain.chain, pendingBlock, pendingTransactions)
     if (pendingBlock) {
       if (Chain.isValidChain([...Chain.chain, pendingBlock])) {
         socket.emit(SOCKET_CLIENT_EVENT.VERIFIED, { block: pendingBlock });
@@ -141,7 +143,7 @@ const Mining = ({ router }) => {
 
       <button
         type="button"
-        disabled={!enableVerify}
+        disabled={!enableVerify || animationName === css.fadeIn}
         onClick={handleVerifyBlock}
         className={classNames(css.button, css.buttonDimension)}
       >
@@ -151,7 +153,7 @@ const Mining = ({ router }) => {
       <button
         type="button"
         onClick={handleMining}
-        disabled={!enableMining}
+        disabled={!enableMining || animationName === css.fadeIn}
         className={classNames(css.button, css.buttonDimension)}
       >
         Mine new block

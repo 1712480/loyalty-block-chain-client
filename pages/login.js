@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { get } from 'lodash';
 import { ec } from 'elliptic';
 import Router from 'next/router';
+import { createHash } from 'crypto';
 import { saveAs } from 'file-saver';
 import classNames from 'classnames';
 import { toast } from 'react-toastify';
@@ -14,10 +15,18 @@ export default function Login() {
   const userName = useRef(null);
   const fileInput = useRef(null);
   const publicKeyField = useRef(null);
+  const nameField = useRef(null);
+  const signatureField = useRef(null);
   const privateKeyField = useRef(null);
   const [keyPair, setKeyPair] = useState(generator.genKeyPair());
   const [initialLoad, setInitialLoad] = useState(true);
   const [modalAnimation, setModalAnimation] = useState(styles.hide);
+
+  const verifyWallet = (publicKey, privateKey, name, signature) => {
+    const keypair = generator.keyFromPublic(publicKey, 'hex');
+    const hash = createHash('SHA256').update(name).digest('hex');
+    return keypair.verify(hash, signature)
+  };
 
   const handleSelectedCredentialFile = (event) => {
     const file = get(event, 'target.files[0]');
@@ -26,11 +35,36 @@ export default function Login() {
     reader.readAsText(file, 'UTF-8');
     reader.onload = async (readerEvent) => {
       const content = readerEvent.target.result;
-      const { publicKey, privateKey, name } = JSON.parse(content);
+      const { publicKey, privateKey, name, signature } = JSON.parse(content);
 
-      localStorage.setItem('credentials', JSON.stringify({ publicKey, privateKey, name }));
-      await Router.push('/');
+      if (verifyWallet(publicKey, privateKey, name, signature)) {
+        localStorage.setItem('credentials', JSON.stringify({ publicKey, privateKey, name }));
+        await Router.push('/');
+      } else {
+        fileInput.current.value = null;
+        toast.error('Invalid wallet credential!');
+      }
     };
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (privateKeyField.current.value && publicKeyField.current.value && signatureField.current.value) {
+      const name = nameField.current.value;
+      const signature = signatureField.current.value;
+      const publicKey = publicKeyField.current.value;
+      const privateKey = privateKeyField.current.value;
+
+      if (verifyWallet(publicKey, privateKey, name, signature))  {
+        localStorage.setItem('credentials', JSON.stringify({ publicKey, privateKey, name, signature }));
+        await Router.push('/');
+      } else {
+        toast.error('Invalid wallet credential!');
+      }
+    } else {
+      toast.error('Please provide all required data');
+    }
   };
 
   const toggleModal = (openModal) => {
@@ -40,21 +74,8 @@ export default function Login() {
 
     setModalAnimation(openModal ? styles.fadeIn : styles.fadeOut);
   }
+
   const toggleFileDialog = () => fileInput.current.click();
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (privateKeyField.current.value && publicKeyField.current.value) {
-      const privateKey = privateKeyField.current.value;
-      const publicKey = publicKeyField.current.value;
-
-      localStorage.setItem('credentials', JSON.stringify({ publicKey, privateKey }));
-      await Router.push('/');
-    } else {
-      toast.error('Please provide all required data');
-    }
-  };
 
   const generateNewKeyPair = () => setKeyPair(generator.genKeyPair());
 
@@ -63,7 +84,9 @@ export default function Login() {
       const name = userName.current.value;
       const publicKey = keyPair.getPublic('hex');
       const privateKey = keyPair.getPrivate('hex');
-      const dataToSave = JSON.stringify({ publicKey, privateKey, name });
+      const signature = keyPair.sign(createHash('SHA256').update(name).digest('hex'), 'base64')
+        .toDER('hex');
+      const dataToSave = JSON.stringify({ publicKey, privateKey, name, signature });
       const credentialFile = new Blob([dataToSave], {
         type: 'text/plain;charset=utf-8',
       });
@@ -88,6 +111,18 @@ export default function Login() {
           type="text"
           placeholder="public key ..."
           ref={publicKeyField}
+        />
+        <input
+          className={classNames(styles.input)}
+          type="text"
+          placeholder="name ..."
+          ref={nameField}
+        />
+        <input
+          className={classNames(styles.input)}
+          type="text"
+          placeholder="signature ..."
+          ref={signatureField}
         />
         <input
           className={classNames(styles.input)}
