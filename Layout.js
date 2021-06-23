@@ -38,9 +38,9 @@ const Layout = ({ children }) => {
   };
 
   const renderResellerList = !!resellers.length && resellers.map(reseller => {
-    const { name, image } = reseller;
+    const { name, image, publicKey } = reseller;
 
-    return <img key={name} alt={name} src={image} onClick={() => copyPublicKey(name, name)} />
+    return <img key={name} alt={name} src={image} onClick={() => copyPublicKey(publicKey, name)} />
   });
 
   return (
@@ -66,8 +66,12 @@ const Layout = ({ children }) => {
 
       <main className={styles.main}>
         <div className={classnames(styles.grid, { [styles.open]: openResellerList })}>
-          {renderResellerList}
-          <button onClick={toggleResellerList}>{openResellerList ? <AiOutlineRight /> : <AiOutlineLeft />}</button>
+          {!!resellers.length &&
+          <>
+            {renderResellerList}
+            <button onClick={toggleResellerList}>{openResellerList ? <AiOutlineRight /> : <AiOutlineLeft />}</button>
+          </>
+          }
         </div>
         {children}
       </main>

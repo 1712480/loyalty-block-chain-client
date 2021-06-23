@@ -9,13 +9,13 @@ import { toast } from 'react-toastify';
 import styles from '../styles/Login.module.scss';
 
 const generator = new ec('secp256k1');
-const key = generator.genKeyPair();
 
 export default function Login() {
   const userName = useRef(null);
   const fileInput = useRef(null);
   const publicKeyField = useRef(null);
   const privateKeyField = useRef(null);
+  const [keyPair, setKeyPair] = useState(generator.genKeyPair());
   const [initialLoad, setInitialLoad] = useState(true);
   const [modalAnimation, setModalAnimation] = useState(styles.hide);
 
@@ -56,11 +56,13 @@ export default function Login() {
     }
   };
 
+  const generateNewKeyPair = () => setKeyPair(generator.genKeyPair());
+
   const handleCreateWallet = async () => {
     try {
       const name = userName.current.value;
-      const publicKey = key.getPublic('hex');
-      const privateKey = key.getPrivate('hex');
+      const publicKey = keyPair.getPublic('hex');
+      const privateKey = keyPair.getPrivate('hex');
       const dataToSave = JSON.stringify({ publicKey, privateKey, name });
       const credentialFile = new Blob([dataToSave], {
         type: 'text/plain;charset=utf-8',
@@ -68,6 +70,9 @@ export default function Login() {
 
       saveAs(credentialFile, 'Credential.txt');
       toggleModal(false);
+
+      userName.current.value = '';
+      generateNewKeyPair();
     } catch (err) {
       console.log({ err });
     }
