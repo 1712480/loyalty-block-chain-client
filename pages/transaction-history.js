@@ -13,7 +13,7 @@ const TransactionHistory = ({ router }) => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [connected, setConnected] = useState(false);
-  const [wallet] = useWallet({ redirectTo: 'login' });
+  const wallet = useWallet();
 
   useEffect(() => {
     socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);

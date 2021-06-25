@@ -17,7 +17,7 @@ import css from '../styles/Mining.module.scss';
 
 const Mining = ({ router }) => {
   const worker = useRef(null);
-  const [credential] = useWallet({ redirectTo: 'login' });
+  const credential = useWallet();
 
   const [loaded, setLoaded] = useState(false);
   const [animationName, setAnimationName] = useState('');

@@ -19,7 +19,7 @@ const Transaction = ({ router }) => {
   const [balance, setBalance] = useState(0);
   const [connected, setConnected] = useState(false);
   const receiverAddress = useRef(null);
-  const [wallet] = useWallet({ redirectTo: 'login' });
+  const wallet = useWallet();
 
   useEffect(() => {
     socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);

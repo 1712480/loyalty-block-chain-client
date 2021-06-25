@@ -1,27 +1,14 @@
-import { useEffect, useState } from 'react';
 import Router from 'next/router'
+import { useSelector } from 'react-redux';
 
-import { EMPTY } from './constants';
+const useWallet = () => {
+  const credentials = useSelector(({ user }) => user);
 
-const useWallet = ({ redirectTo = false }) => {
-  const [credentials, setCredentials] = useState(null);
+  if (process.browser && (!credentials || !credentials.publicKey)) {
+    return Router.push('/login');
+  }
 
-  useEffect(() => {
-    const data = window.localStorage.getItem('credentials');
-    setCredentials(!data ? EMPTY : JSON.parse(data));
-  }, []);
-
-  useEffect(() => {
-    if (!redirectTo || !credentials) {
-      return;
-    }
-
-    if (credentials && credentials === EMPTY) {
-      Router.push(redirectTo);
-    }
-  }, [credentials, redirectTo]);
-
-  return [credentials, setCredentials];
+  return credentials;
 };
 
 export default useWallet;

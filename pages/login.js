@@ -6,7 +6,9 @@ import { createHash } from 'crypto';
 import { saveAs } from 'file-saver';
 import classNames from 'classnames';
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
 
+import { userLogin } from '../redux/user/action';
 import styles from '../styles/Login.module.scss';
 
 const generator = new ec('secp256k1');
@@ -21,6 +23,7 @@ export default function Login() {
   const [keyPair, setKeyPair] = useState(generator.genKeyPair());
   const [initialLoad, setInitialLoad] = useState(true);
   const [modalAnimation, setModalAnimation] = useState(styles.hide);
+  const dispatch = useDispatch();
 
   const verifyWallet = (publicKey, privateKey, name, signature) => {
     const keypair = generator.keyFromPublic(publicKey, 'hex');
@@ -38,7 +41,7 @@ export default function Login() {
       const { publicKey, privateKey, name, signature } = JSON.parse(content);
 
       if (verifyWallet(publicKey, privateKey, name, signature)) {
-        localStorage.setItem('credentials', JSON.stringify({ publicKey, privateKey, name }));
+        await dispatch(userLogin({ publicKey, privateKey, name, signature }));
         await Router.push('/');
       } else {
         fileInput.current.value = null;
@@ -57,7 +60,7 @@ export default function Login() {
       const privateKey = privateKeyField.current.value;
 
       if (verifyWallet(publicKey, privateKey, name, signature))  {
-        localStorage.setItem('credentials', JSON.stringify({ publicKey, privateKey, name, signature }));
+        await dispatch(userLogin({ publicKey, privateKey, name, signature }));
         await Router.push('/');
       } else {
         toast.error('Invalid wallet credential!');

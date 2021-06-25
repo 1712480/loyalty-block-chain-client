@@ -4,16 +4,19 @@ import { get } from 'lodash';
 import { withRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { FaCopy } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
 
 import Chain from '../entities/chain';
 import socket from '../utilities/socket';
 import useWallet from '../utilities/useWallet';
+import { userLogout } from '../redux/user/action';
 import { EMPTY, SOCKET_CLIENT_EVENT } from '../utilities/constants';
 
 import styles from '../styles/Layout.module.scss';
 
 const Home = ({ router }) => {
-  const [wallet, setCredentials] = useWallet({ redirectTo: 'login' });
+  const wallet = useWallet();
+  const dispatch = useDispatch();
   const [balance, setBalance] = useState(0);
   const [connected, setConnected] = useState(false);
 
@@ -49,8 +52,7 @@ const Home = ({ router }) => {
 
   const exit = () => {
     socket.emit(SOCKET_CLIENT_EVENT.USER_DISCONNECTED);
-    localStorage.removeItem('credentials');
-    setCredentials(EMPTY);
+    dispatch(userLogout());
   }
 
   return (
