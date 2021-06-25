@@ -1,41 +1,42 @@
 import { useEffect, useState } from 'react';
 import classnames from 'classnames';
-import { get } from 'lodash';
 import { withRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { FaCopy } from 'react-icons/fa';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Chain from '../entities/chain';
-import socket from '../utilities/socket';
+import useSocket from '../utilities/useSocket';
 import useWallet from '../utilities/useWallet';
 import { userLogout } from '../redux/user/action';
-import { EMPTY, SOCKET_CLIENT_EVENT } from '../utilities/constants';
 
 import styles from '../styles/Layout.module.scss';
 
 const Home = ({ router }) => {
   const wallet = useWallet();
   const dispatch = useDispatch();
+  const { socketUpdateChain, userDisconnected } = useSocket();
+  const { chain } = useSelector(({ blockChain }) => blockChain);
   const [balance, setBalance] = useState(0);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
-    socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, (data) => {
-      const chain = get(data, 'chain') || [];
-      Chain.setChain(chain);
-      setConnected(true);
-    });
+    socketUpdateChain();
   }, []);
 
   useEffect(() => {
+    if (!connected && !!chain.length) {
+      setConnected(true);
+    }
+  }, [chain, connected]);
+
+  useEffect(() => {
     if (wallet && wallet.publicKey && connected) {
-      setBalance(Chain.getBalanceOfAddress(wallet.publicKey));
+      setBalance(Chain.getBalanceOfAddress(wallet.publicKey, chain));
     }
   }, [wallet, connected]);
 
-  if (!wallet || wallet === EMPTY || !connected) {
+  if (!wallet || !connected) {
     return <h1>Loading ...</h1>
   }
 
@@ -51,7 +52,7 @@ const Home = ({ router }) => {
   }
 
   const exit = () => {
-    socket.emit(SOCKET_CLIENT_EVENT.USER_DISCONNECTED);
+    userDisconnected();
     dispatch(userLogout());
   }
 

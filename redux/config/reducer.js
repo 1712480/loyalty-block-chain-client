@@ -6,7 +6,7 @@ const initialState = {
 };
 
 const reducer = (state = initialState, action) => {
-  switch (state.type) {
+  switch (action.type) {
     case UPDATE_CONFIG:
       return { ...action.payload };
     default:

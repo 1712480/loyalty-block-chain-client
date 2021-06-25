@@ -1,38 +1,40 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { get } from 'lodash';
 import classNames from 'classnames';
 import { toast } from 'react-toastify';
-import socket from '../utilities/socket';
 import { withRouter } from 'next/router';
+import { useSelector } from 'react-redux';
 import PuffLoader from 'react-spinners/PuffLoader';
 import { css as emotionCss } from '@emotion/react';
 
-import chain from '../entities/chain';
+import Chain from '../entities/chain';
 import useWallet from '../utilities/useWallet';
+import useSocket from '../utilities/useSocket';
 import transaction from '../entities/transaction';
-import { SOCKET_CLIENT_EVENT } from '../utilities/constants';
 
 import css from '../styles/Transaction.module.scss';
 
 const Transaction = ({ router }) => {
+  const wallet = useWallet();
+  const { chain } = useSelector(({ blockChain }) => blockChain);
+  const { socketUpdateChain, socketUpdateTransactions } = useSocket();
   const amount = useRef(null);
   const [balance, setBalance] = useState(0);
   const [connected, setConnected] = useState(false);
   const receiverAddress = useRef(null);
-  const wallet = useWallet();
 
   useEffect(() => {
-    socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
-    socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, (data) => {
-      const newChain = get(data, 'chain') || [];
-      chain.setChain(newChain);
-      setConnected(true);
-    });
+    socketUpdateChain();
   }, []);
 
   useEffect(() => {
+    if (!connected && !!chain.length) {
+      setConnected(true);
+    }
+  }, [chain, connected]);
+
+  useEffect(() => {
     if (wallet && wallet.publicKey && connected) {
-      setBalance(chain.getBalanceOfAddress(wallet.publicKey));
+      setBalance(Chain.getBalanceOfAddress(wallet.publicKey, chain));
     }
   }, [connected]);
 
@@ -53,7 +55,7 @@ const Transaction = ({ router }) => {
         timestamp: Date.now()
       };
       const newTransaction = transaction.signTransaction(data, wallet.privateKey);
-      socket.emit(SOCKET_CLIENT_EVENT.NEW_TRANSACTION, { transaction: newTransaction });
+      socketUpdateTransactions({ transaction: newTransaction });
 
       toast.success('Created transaction');
       amount.current.value = '';

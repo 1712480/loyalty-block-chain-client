@@ -9,7 +9,7 @@ import { css as emotionCss } from '@emotion/react';
 
 import Chain from '../entities/chain';
 import Transaction from '../entities/transaction';
-import socket from '../utilities/socket';
+import socket from '../utilities/useSocket';
 import useWallet from "../utilities/useWallet";
 import { SOCKET_CLIENT_EVENT, WORKER_EVENT } from '../utilities/constants';
 

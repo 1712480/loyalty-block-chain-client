@@ -9,16 +9,16 @@ import '../styles/globals.css'
 
 function MyApp({ Component, pageProps, reduxStore }) {
   return (
-      <Layout>
-        <Provider store={reduxStore}>
-          <PersistGate
-            loading={null}
-            persistor={persistStore(reduxStore)}
-          >
+    <Provider store={reduxStore}>
+      <PersistGate
+        loading={null}
+        persistor={persistStore(reduxStore)}
+      >
+        <Layout>
             <Component {...pageProps} />
-          </PersistGate>
-        </Provider>
-      </Layout>
+        </Layout>
+      </PersistGate>
+    </Provider>
   )
 }
 

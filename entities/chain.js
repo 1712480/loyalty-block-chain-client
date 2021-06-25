@@ -55,10 +55,10 @@ class Chain {
     return true;
   };
 
-  getAllTransactionForAddress (publicKey) {
+  getAllTransactionForAddress (publicKey, chain) {
     const txs = [];
 
-    for (let block of this.chain) {
+    for (let block of chain) {
       for (let tx of block.transactions) {
         if (tx.toAddress === publicKey || tx.fromAddress === publicKey) txs.push(tx);
       }
@@ -67,10 +67,10 @@ class Chain {
     return txs;
   };
 
-  getBalanceOfAddress(publicKey) {
+  getBalanceOfAddress(publicKey, chain) {
     let balance = 0;
 
-    for (let block of this.chain) {
+    for (let block of chain) {
       for (let tx of block.transactions) {
         if (tx.toAddress === publicKey) balance += tx.amount;
         if (tx.fromAddress === publicKey) balance -= tx.amount;

@@ -1,33 +1,36 @@
 import React, {useState, useEffect } from 'react';
 import { withRouter } from 'next/router';
 import classNames from 'classnames';
+import { useSelector } from 'react-redux';
 
 import Chain from '../entities/chain';
-
-import { SOCKET_CLIENT_EVENT } from '../utilities/constants';
+import useWallet from '../utilities/useWallet';
+import useSocket from '../utilities/useSocket';
 import css from '../styles/Transaction.module.scss';
-import socket from '../utilities/socket';
-import useWallet from "../utilities/useWallet";
 
 const TransactionHistory = ({ router }) => {
+  const wallet = useWallet();
+  const { socketUpdateChain } = useSocket();
+  const { chain } = useSelector(({ blockChain}) => blockChain);
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [connected, setConnected] = useState(false);
-  const wallet = useWallet();
 
   useEffect(() => {
-    socket.emit(SOCKET_CLIENT_EVENT.UPDATE_ALL);
-    socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, ({ chain }) => {
-      Chain.setChain(chain);
-      setConnected(true);
-    });
+    socketUpdateChain();
   }, []);
 
   useEffect(() => {
+    if (!connected && !!chain.length) {
+      setConnected(true);
+    }
+  }, [chain, connected]);
+
+  useEffect(() => {
     if (wallet && wallet.publicKey && connected) {
-      const calculatedBalance = Chain.getBalanceOfAddress(wallet.publicKey);
+      const calculatedBalance = Chain.getBalanceOfAddress(wallet.publicKey, chain);
       setBalance(calculatedBalance);
-      const allTransactions = Chain.getAllTransactionForAddress(wallet.publicKey);
+      const allTransactions = Chain.getAllTransactionForAddress(wallet.publicKey, chain);
       setTransactions(allTransactions)
     }
   }, [connected]);

@@ -1,29 +1,39 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import classnames from 'classnames';
-import { get } from 'lodash';
+import axios from 'axios';
 import Head from 'next/head';
+import { useSelector, useDispatch } from 'react-redux';
 import { toast, ToastContainer, Zoom } from 'react-toastify';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 
-import socket from './utilities/socket';
-import { SOCKET_CLIENT_EVENT } from './utilities/constants';
+import { updateConfig } from './redux/config/action';
+import { SERVER_ADDRESS, SERVER_ENDPOINT } from './utilities/constants';
 
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './styles/Layout.module.scss';
 
 const Layout = ({ children }) => {
-  const [resellers, setResellers] = useState([]);
+  const dispatch = useDispatch();
+  const { resellers } = useSelector(({ config }) => config);
+  const [connected, setConnected] = useState(false);
   const [openResellerList, setOpenResellerList] = useState(false);
 
-  useEffect(() => {
-    socket.on(SOCKET_CLIENT_EVENT.UPDATE_ALL, (data) => {
-      const resellerList = get(data, 'resellers') || [];
+  const fetchConfig = () => axios.get(`${SERVER_ADDRESS}/${SERVER_ENDPOINT.CONFIG}`, {})
 
-      if (resellerList.length) {
-        setResellers(resellerList)
-      }
-    });
+  useEffect(() => {
+    fetchConfig()
+      .then(({ data }) => dispatch(updateConfig(data)))
+      .catch(error => {
+        console.log({ error });
+        toast.error('Something happened! Please try again later.');
+      });
   }, []);
+
+  useEffect(() => {
+    if (!connected && !!resellers.length) {
+      setConnected(true);
+    }
+  }, [resellers, connected]);
 
   const toggleResellerList = () => setOpenResellerList(!openResellerList);
 
@@ -66,7 +76,7 @@ const Layout = ({ children }) => {
 
       <main className={styles.main}>
         <div className={classnames(styles.grid, { [styles.open]: openResellerList })}>
-          {!!resellers.length &&
+          {connected && !!resellers.length &&
           <>
             {renderResellerList}
             <button onClick={toggleResellerList}>{openResellerList ? <AiOutlineRight /> : <AiOutlineLeft />}</button>

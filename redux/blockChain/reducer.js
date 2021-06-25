@@ -25,8 +25,7 @@ const blockChainReducer = (state = initialState, action) => {
         pendingTransactions: newList,
       }
     case UPDATE_ALL:
-      const { block, chain, transactions } = action.payload;
-      return { block, chain, pendingTransactions: transactions };
+      return { ...action.payload };
     default:
       return state;
   }

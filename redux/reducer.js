@@ -14,7 +14,8 @@ export const rootReducer = combineReducers({
 
 export const persistConfig = {
   key: 'root',
-  storage
+  storage,
+  blacklist: ['blockChain']
 };
 
 export const bindMiddleWare = () => {

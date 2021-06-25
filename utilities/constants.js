@@ -6,15 +6,16 @@ const HOST = {
 export const SERVER_ADDRESS = HOST[process.env.NODE_ENV];
 
 export const SERVER_ENDPOINT = {
-  CREATE_WALLET: 'wallet',
-  NEW_TRANSACTION: 'transaction',
-  AUTHENTICATE: 'wallet/authenticate-with-signed-public-key'
+  CONFIG: 'config'
 }
 
 export const SOCKET_CLIENT_EVENT = {
+  UPDATE_ALL: 'update-all',
+  UPDATE_CHAIN: 'update-chain',
+  UPDATE_BLOCK: 'update-block',
+  UPDATE_TRANSACTIONS: 'update-transactions',
   USER_DISCONNECTED: 'user-disconnected',
   NEW_TRANSACTION: 'new-transaction',
-  UPDATE_ALL: 'update-all',
   VERIFIED: 'verified',
   WELCOME_USER: 'welcome',
   DISCONNECT: 'disconnect',
