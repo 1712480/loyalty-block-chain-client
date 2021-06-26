@@ -7,7 +7,6 @@ import { Fade } from 'react-awesome-reveal';
 import SkewLoader from 'react-spinners/SkewLoader';
 import { css as emotionCss } from '@emotion/react';
 
-import Chain from '../entities/chain';
 import useWallet from '../utilities/useWallet';
 import useSocket from '../utilities/useSocket';
 import transaction from '../entities/transaction';
@@ -16,10 +15,10 @@ import css from '../styles/Transaction.module.scss';
 
 const Transaction = ({ router }) => {
   const wallet = useWallet();
+  const { balance } = useSelector(({ user }) => user);
   const { chain } = useSelector(({ blockChain }) => blockChain);
   const { socketUpdateChain, socketUpdateTransactions } = useSocket();
   const amount = useRef(null);
-  const [balance, setBalance] = useState(0);
   const [connected, setConnected] = useState(false);
   const receiverAddress = useRef(null);
 
@@ -32,12 +31,6 @@ const Transaction = ({ router }) => {
       setConnected(true);
     }
   }, [chain, connected]);
-
-  useEffect(() => {
-    if (wallet && wallet.publicKey && connected) {
-      setBalance(Chain.getBalanceOfAddress(wallet.publicKey, chain));
-    }
-  }, [connected]);
 
   const goBack = () => router.push('/');
 

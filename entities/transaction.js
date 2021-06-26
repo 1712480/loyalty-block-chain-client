@@ -30,11 +30,15 @@ class Transaction {
     }
   };
 
-  static isValid(transaction) {
+  static isValid(transaction, chain) {
     // This is a reward transaction
     if (transaction.fromAddress === null) return true;
 
-    const senderBalance = Chain.getBalanceOfAddress(transaction.fromAddress);
+    if (!chain.length) {
+      return false;
+    }
+
+    const senderBalance = Chain.getBalanceOfAddress(transaction.fromAddress, chain);
     if (senderBalance < transaction.amount || transaction.fromAddress === transaction.toAddress) return false;
 
     const keypair = this.ec.keyFromPublic(transaction.fromAddress, 'hex');

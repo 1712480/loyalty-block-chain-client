@@ -1,11 +1,13 @@
-import { USER_LOGIN, USER_LOGOUT } from './action';
+import { USER_LOGIN, USER_LOGOUT, UPDATE_BALANCE } from './action';
 
 const initialState = {
   publicKey: '',
   privateKey: '',
   signature: '',
-  name: ''
-}
+  name: '',
+  balance: 0,
+};
+
 const userReducer = (state = initialState, action) => {
   switch ((action.type)) {
     case USER_LOGIN:
@@ -14,6 +16,11 @@ const userReducer = (state = initialState, action) => {
       }
     case USER_LOGOUT:
       return {};
+    case UPDATE_BALANCE:
+      return {
+        ...state,
+        balance: action.payload
+      };
     default:
       return state;
   }

@@ -24,11 +24,17 @@
 
 .footer {
   width: 100%;
-  height: 100px;
-  border-top: 1px solid #eaeaea;
   display: flex;
-  justify-content: center;
+  margin-top: 1rem;
+  height: fit-content;
   align-items: center;
+  align-content: start;
+  justify-content: center;
+  border-top: 1px solid #eaeaea;
+
+  p {
+    margin: 2rem 0;
+  }
 }
 
 .footer a {
@@ -76,6 +82,7 @@
 
 .grid {
   left: 100%;
+  z-index: 2;
   bottom: 2rem;
   display: grid;
   padding: 1rem;
@@ -107,7 +114,7 @@
     cursor: pointer;
     line-height: 32px;
     position: absolute;
-    background-color: white;
+    background-color: transparent;
     right: calc(100% + 0.5rem);
     transition: all ease 0.1s;
 
@@ -117,6 +124,7 @@
 
     svg {
       height: 32px;
+      color: #ff6363;
     }
   }
 

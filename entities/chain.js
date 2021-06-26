@@ -2,7 +2,6 @@ import crypto from 'crypto';
 import Transaction from './transaction';
 
 class Chain {
-  static difficulty = 4;
   static genesisNonce = 123456789;
   static genesisHash = 'genesis-block';
   static genesisPrevHash = 'genesis-block-prev-hash';
@@ -11,11 +10,11 @@ class Chain {
     this.chain = [];
   }
 
-  setChain(chain) {
-    this.chain = chain;
-  };
+  isValidChain(chain, difficulty) {
+    if (!chain.length) {
+      return false;
+    }
 
-  isValidChain(chain) {
     const genesisBlock = chain[0];
 
     if (
@@ -30,23 +29,22 @@ class Chain {
       const currentBlock = chain[i];
 
       // TODO: find other way to by pass system reward
-      if (currentBlock.hash.length !== Chain.difficulty) {
+      if (currentBlock.hash.length !== difficulty) {
         const prevBlock = chain[i - 1];
         const blockHash = hashBlock(currentBlock.prevHash, currentBlock.transactions, currentBlock.nonce);
 
         currentBlock.transactions.forEach(transaction => {
-          if (!Transaction.isValid(transaction)) {
+          if (!Transaction.isValid(transaction, chain)) {
             console.log('invalid transaction');
             return false;
           }
-        })
+        });
 
         if (
-          blockHash.substr(0, Chain.difficulty) !== Array(Chain.difficulty + 1).join('0')
+          blockHash.substr(0, difficulty) !== Array(difficulty + 1).join('0')
           || blockHash !== currentBlock.hash
           || currentBlock.prevHash !== prevBlock.hash
         ) {
-          console.log(currentBlock.prevHash, prevBlock.hash)
           return false;
         }
       }
@@ -58,9 +56,11 @@ class Chain {
   getAllTransactionForAddress (publicKey, chain) {
     const txs = [];
 
-    for (let block of chain) {
-      for (let tx of block.transactions) {
-        if (tx.toAddress === publicKey || tx.fromAddress === publicKey) txs.push(tx);
+    if (publicKey && chain.length) {
+      for (let block of chain) {
+        for (let tx of block.transactions) {
+          if (tx.toAddress === publicKey || tx.fromAddress === publicKey) txs.push(tx);
+        }
       }
     }
 
@@ -70,10 +70,12 @@ class Chain {
   getBalanceOfAddress(publicKey, chain) {
     let balance = 0;
 
-    for (let block of chain) {
-      for (let tx of block.transactions) {
-        if (tx.toAddress === publicKey) balance += tx.amount;
-        if (tx.fromAddress === publicKey) balance -= tx.amount;
+    if (!!chain.length && publicKey) {
+      for (let block of chain) {
+        for (let tx of block.transactions) {
+          if (tx.toAddress === publicKey) balance += tx.amount;
+          if (tx.fromAddress === publicKey) balance -= tx.amount;
+        }
       }
     }
 

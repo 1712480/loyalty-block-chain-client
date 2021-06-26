@@ -3,12 +3,11 @@ import crypto from 'crypto';
 
 import { WORKER_EVENT } from '../utilities/constants';
 
-const difficulty = 4;
-
 onmessage = (event) => {
   const message = get(event, 'data[0]');
   const transactions = get(event,'data[1].transactions', []);
   const lastBlockHash = get(event, 'data[1].lastBlockHash', '');
+  const difficulty = get(event, 'data[1].difficulty', 4);
 
   if (message === WORKER_EVENT.GREETINGS) {
     console.log('[Worker]: 👷 Proof of work worker installed');
@@ -16,10 +15,10 @@ onmessage = (event) => {
   }
 
   if (message === WORKER_EVENT.START_MINING) {
-    console.log('[Worker]: 👷 Received start mining message.');
+    console.log(`[Worker]: 👷 Received start mining message. with difficulty: ${difficulty}`);
 
     try {
-      const newBlock = mineNewBlock(transactions, lastBlockHash);
+      const newBlock = mineNewBlock(transactions, lastBlockHash, difficulty);
       postMessage([WORKER_EVENT.MINE_SUCCEED, newBlock]);
     } catch(error) {
       postMessage([WORKER_EVENT.MINE_FAILED, error]);
@@ -27,7 +26,7 @@ onmessage = (event) => {
   }
 };
 
-const mineNewBlock = (pendingTransaction, prevHash) => {
+const mineNewBlock = (pendingTransaction, prevHash, difficulty) => {
   let nonce = 0;
 
   while (true) {
@@ -55,4 +54,4 @@ const hashBlock = (prevHash, transactions, nonce) => {
 
   hash.update(hashData).end();
   return hash.digest('hex');
-}
+};

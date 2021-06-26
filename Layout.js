@@ -87,7 +87,7 @@ const Layout = ({ children }) => {
       </main>
 
       <footer className={styles.footer}>
-        1712480 - 1712740
+        <p>1712480 - 1712740</p>
       </footer>
     </div>
   )

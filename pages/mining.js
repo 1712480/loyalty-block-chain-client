@@ -13,14 +13,15 @@ import Chain from '../entities/chain';
 import Transaction from '../entities/transaction';
 import useSocket from '../utilities/useSocket';
 import useWallet from "../utilities/useWallet";
-import { SOCKET_CLIENT_EVENT, WORKER_EVENT } from '../utilities/constants';
+import { WORKER_EVENT } from '../utilities/constants';
 
 import css from '../styles/Mining.module.scss';
 
 const Mining = ({ router }) => {
   const worker = useRef(null);
   const credential = useWallet();
-  const { socketUpdateChain } = useSocket();
+  const { socketUpdateAll, requestVerify, validBlock } = useSocket();
+  const { difficulty } = useSelector(({ config }) => config);
   const { chain, block, pendingTransactions } = useSelector(({ blockChain }) => blockChain);
 
   const [loaded, setLoaded] = useState(false);
@@ -31,17 +32,16 @@ const Mining = ({ router }) => {
   const [enableMining, setEnableMining] = useState(false);
 
   useEffect(() => {
-    socketUpdateChain();
+    socketUpdateAll();
     worker.current = new Worker(new URL('../public/mine.worker', import.meta.url));
 
-    // TODO: update worker with difficulty
     worker.current.onmessage = (event) => {
       const message = get(event, 'data[0]', '');
       const data = get(event, 'data[1]', {});
 
       if (message === WORKER_EVENT.MINE_SUCCEED) {
         setAnimationName(css.fadeOut);
-        useSocket.emit(SOCKET_CLIENT_EVENT.REQUEST_VERIFY, { block: data });
+        requestVerify(data);
         toast.success('Mined new block succeed, waiting for verification');
       }
 
@@ -97,18 +97,19 @@ const Mining = ({ router }) => {
       setAnimationName(css.fadeIn);
       worker.current.postMessage([WORKER_EVENT.START_MINING, {
         transactions: [...pendingTransactions, rewardTransaction],
-        lastBlockHash: Chain.chain[Chain.chain.length - 1].hash
+        lastBlockHash: chain[chain.length - 1].hash,
+        difficulty
       }]);
     }
   };
 
   const handleVerifyBlock = () => {
-    console.log('verify', chain, block, pendingTransactions)
-    if (block) {
-      if (Chain.isValidChain([...chain, block])) {
-        // useSocket.emit(SOCKET_CLIENT_EVENT.VERIFIED, { block });
+    if (block.hash && chain.length) {
+      if (Chain.isValidChain([...chain, block], difficulty)) {
+        validBlock(block);
         toast.success('Block verified as VALID');
       } else {
+        setEnableVerify(false);
         toast.error('Block verified as INVALID');
       }
     }

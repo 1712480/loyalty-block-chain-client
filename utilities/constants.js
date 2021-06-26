@@ -16,7 +16,7 @@ export const SOCKET_CLIENT_EVENT = {
   UPDATE_TRANSACTIONS: 'update-transactions',
   USER_DISCONNECTED: 'user-disconnected',
   NEW_TRANSACTION: 'new-transaction',
-  VERIFIED: 'verified',
+  VALID_BLOCK: 'valid-block',
   WELCOME_USER: 'welcome',
   DISCONNECT: 'disconnect',
   REQUEST_VERIFY: 'request-verify',

@@ -14,8 +14,8 @@ import css from '../styles/Transaction.module.scss';
 const TransactionHistory = ({ router }) => {
   const wallet = useWallet();
   const { socketUpdateChain } = useSocket();
-  const { chain } = useSelector(({ blockChain}) => blockChain);
-  const [balance, setBalance] = useState(0);
+  const { balance } = useSelector(({ user }) => user);
+  const { chain } = useSelector(({ blockChain }) => blockChain);
   const [transactions, setTransactions] = useState([]);
   const [connected, setConnected] = useState(false);
 
@@ -31,8 +31,6 @@ const TransactionHistory = ({ router }) => {
 
   useEffect(() => {
     if (wallet && wallet.publicKey && connected) {
-      const calculatedBalance = Chain.getBalanceOfAddress(wallet.publicKey, chain);
-      setBalance(calculatedBalance);
       const allTransactions = Chain.getAllTransactionForAddress(wallet.publicKey, chain);
       setTransactions(allTransactions)
     }

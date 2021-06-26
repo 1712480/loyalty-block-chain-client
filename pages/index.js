@@ -19,8 +19,8 @@ const Home = ({ router }) => {
   const wallet = useWallet();
   const dispatch = useDispatch();
   const { socketUpdateChain, userDisconnected } = useSocket();
+  const { balance } = useSelector(({ user }) => user);
   const { chain } = useSelector(({ blockChain }) => blockChain);
-  const [balance, setBalance] = useState(0);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
@@ -32,12 +32,6 @@ const Home = ({ router }) => {
       setConnected(true);
     }
   }, [chain, connected]);
-
-  useEffect(() => {
-    if (wallet && wallet.publicKey && connected) {
-      setBalance(Chain.getBalanceOfAddress(wallet.publicKey, chain));
-    }
-  }, [wallet, connected]);
 
   if (!wallet || !connected) {
     return <SkewLoader css={emotionCss`size: 60; color: 'black'`} />;
