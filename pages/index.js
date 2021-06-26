@@ -3,6 +3,9 @@ import classnames from 'classnames';
 import { withRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { FaCopy } from 'react-icons/fa';
+import { Fade } from 'react-awesome-reveal';
+import SkewLoader from 'react-spinners/SkewLoader';
+import { css as emotionCss } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Chain from '../entities/chain';
@@ -37,7 +40,7 @@ const Home = ({ router }) => {
   }, [wallet, connected]);
 
   if (!wallet || !connected) {
-    return <h1>Loading ...</h1>
+    return <SkewLoader css={emotionCss`size: 60; color: 'black'`} />;
   }
 
   const copyPublicKey = () => {
@@ -57,7 +60,7 @@ const Home = ({ router }) => {
   }
 
   return (
-    <div className={styles.content}>
+    <Fade triggerOnce className={styles.content} cascade damping={0.3} duration={500}>
       <h1 className={styles.title}>
         Loyalty Exchange!
       </h1>
@@ -69,7 +72,7 @@ const Home = ({ router }) => {
       <button className={classnames(styles.button, styles.buttonDimension)} onClick={() => router.push('/transaction-history')}>Transaction history</button>
       <button className={classnames(styles.button, styles.buttonDimension)} onClick={exit}>Exit</button>
       <input hidden id="publicKey" type="text" value={wallet.publicKey} />
-    </div>
+    </Fade>
   )
 };
 

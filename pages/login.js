@@ -7,13 +7,14 @@ import { saveAs } from 'file-saver';
 import classNames from 'classnames';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
+import { Fade } from 'react-awesome-reveal';
 
 import { userLogin } from '../redux/user/action';
 import styles from '../styles/Login.module.scss';
 
 const generator = new ec('secp256k1');
 
-export default function Login() {
+const Login = () => {
   const userName = useRef(null);
   const fileInput = useRef(null);
   const publicKeyField = useRef(null);
@@ -105,7 +106,7 @@ export default function Login() {
   };
 
   return (
-    <div className={styles.container}>
+    <Fade triggerOnce className={styles.container}>
       <form onSubmit={handleSubmit} className={styles.form}>
         <h1>Access your wallet</h1>
 
@@ -189,6 +190,8 @@ export default function Login() {
           </div>
         </div>
       </form>
-    </div>
+    </Fade>
   );
 }
+
+export default Login;

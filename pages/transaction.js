@@ -3,7 +3,8 @@ import classNames from 'classnames';
 import { toast } from 'react-toastify';
 import { withRouter } from 'next/router';
 import { useSelector } from 'react-redux';
-import PuffLoader from 'react-spinners/PuffLoader';
+import { Fade } from 'react-awesome-reveal';
+import SkewLoader from 'react-spinners/SkewLoader';
 import { css as emotionCss } from '@emotion/react';
 
 import Chain from '../entities/chain';
@@ -67,7 +68,7 @@ const Transaction = ({ router }) => {
   };
 
   return connected ? (
-    <div className={css.container}>
+    <Fade triggerOnce className={css.container}>
       <h1>Transaction</h1>
       <h4>Balance: {balance}</h4>
 
@@ -84,8 +85,8 @@ const Transaction = ({ router }) => {
       >
         Go back
       </button>
-    </div>
-  ) : <PuffLoader css={emotionCss`size: 60; color: 'black'`} />;
+    </Fade>
+  ) : <SkewLoader css={emotionCss`size: 60; color: 'black'`} />;
 }
 
 export default withRouter(Transaction);

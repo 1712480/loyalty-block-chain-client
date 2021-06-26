@@ -2,6 +2,9 @@ import React, {useState, useEffect } from 'react';
 import { withRouter } from 'next/router';
 import classNames from 'classnames';
 import { useSelector } from 'react-redux';
+import { Fade } from 'react-awesome-reveal';
+import SkewLoader from 'react-spinners/SkewLoader';
+import { css as emotionCss } from '@emotion/react';
 
 import Chain from '../entities/chain';
 import useWallet from '../utilities/useWallet';
@@ -58,7 +61,7 @@ const TransactionHistory = ({ router }) => {
   const goBack = () => router.push('/');
 
   return connected ? (
-    <div className={css.container}>
+    <Fade triggerOnce className={css.container}>
       <h1>Transaction history</h1>
       <h4>Balance: {balance} after {transactions.length} transaction{transactions.length > 1 && 's'}</h4>
 
@@ -73,8 +76,8 @@ const TransactionHistory = ({ router }) => {
       >
         Go back to wallet
       </button>
-    </div>
-  ) : <h1>Loading</h1>
+    </Fade>
+  ) : <SkewLoader css={emotionCss`size: 60; color: 'black'`} />;
 }
 
 export default withRouter(TransactionHistory);
