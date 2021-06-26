@@ -62,9 +62,9 @@ const Layout = ({ children }) => {
         closeOnClick
         hideProgressBar
         autoClose={3000}
-        pauseOnFocusLoss
         transition={Zoom}
         pauseOnHover={false}
+        pauseOnFocusLoss={false}
         position="top-right"
       />
 
