@@ -95,7 +95,7 @@ const Login = () => {
         type: 'text/plain;charset=utf-8',
       });
 
-      saveAs(credentialFile, 'Credential.txt');
+      saveAs(credentialFile, name.length ? name : 'Credential.txt');
       toggleModal(false);
 
       userName.current.value = '';
