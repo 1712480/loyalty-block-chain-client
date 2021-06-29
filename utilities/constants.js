@@ -30,4 +30,7 @@ export const WORKER_EVENT = {
   MINE_FAILED: 'MINE_FAILED',
 }
 
-export const EMPTY = 'empty';
+export const IMAGE_URL = {
+  REWARD: 'https://res.cloudinary.com/dmiw0tnor/image/upload/v1624956732/Loyalty-block-chain/reward_fakcor.png',
+  USER: 'https://res.cloudinary.com/dmiw0tnor/image/upload/v1624956732/Loyalty-block-chain/user_f9admb.png',
+}

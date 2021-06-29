@@ -57,10 +57,13 @@ class Chain {
     const txs = [];
 
     if (publicKey && chain.length) {
+      let index = 0;
+
       for (let block of chain) {
         for (let tx of block.transactions) {
-          if (tx.toAddress === publicKey || tx.fromAddress === publicKey) txs.push(tx);
+          if (tx.toAddress === publicKey || tx.fromAddress === publicKey) txs.push({ ...tx, index });
         }
+        index += 1;
       }
     }
 
