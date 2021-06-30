@@ -1,10 +1,12 @@
 import React, {useState, useEffect } from 'react';
 import { withRouter } from 'next/router';
 import classNames from 'classnames';
+import { saveAs } from 'file-saver';
 import { useSelector } from 'react-redux';
 import { Fade, Reveal } from 'react-awesome-reveal';
 import SkewLoader from 'react-spinners/SkewLoader';
 import { css as emotionCss } from '@emotion/react';
+import { Modal, useModal, ModalTransition } from 'react-simple-hook-modal';
 
 import Chain from '../entities/chain';
 import useWallet from '../utilities/useWallet';
@@ -15,11 +17,12 @@ import css from '../styles/Transaction.module.scss';
 
 const getDateFromTimestamp = (timeStamp) => {
   const date = new Date(timeStamp);
-  const day = date.getDate();
-  const month = date.getMonth();
-  const year = date.getFullYear();
+  return date.toLocaleDateString();
+};
 
-  return `${month}/${day}/${year}`;
+const getTimeFromTimestamp = (timestamp) => {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString();
 };
 
 const TransactionHistory = ({ router }) => {
@@ -30,6 +33,8 @@ const TransactionHistory = ({ router }) => {
   const { resellers } = useSelector(({ config }) => config);
   const [transactions, setTransactions] = useState([]);
   const [connected, setConnected] = useState(false);
+  const [modalData, setModalData] = useState([]);
+  const { openModal, isModalOpen, closeModal } = useModal();
 
   useEffect(() => {
     socketUpdateChain();
@@ -48,80 +53,123 @@ const TransactionHistory = ({ router }) => {
     }
   }, [connected]);
 
+  const exportTransactionToFile = () => {
+    const data = {};
+
+    for (let i = 0; i < modalData.length; i++) {
+      data[modalData[i][0]] = modalData[i][1];
+    }
+
+    const credentialFile = new Blob([JSON.stringify(data)], {
+      type: 'text/plain;charset=utf-8',
+    });
+
+    saveAs(credentialFile, 'Transaction.txt');
+  };
+
   const getResellerByPublicKey = (key) => {
     const foundReseller = resellers.find(({ publicKey }) => publicKey === key);
     return foundReseller || null;
-  }
+  };
+
+  const openModalWithTransaction = (transaction, reseller = false) => {
+    const { amount, fromAddress, index, timestamp, toAddress } = transaction;
+
+    if (reseller) {
+      const { name } = reseller;
+      const resellerTransaction = [
+        ['Date (time)', `${getDateFromTimestamp(timestamp)} (${getTimeFromTimestamp(timestamp)})`],
+        ['Rewarded from', name],
+        ['Amount', amount],
+        ['Block index', index]
+      ];
+      setModalData(resellerTransaction);
+      return openModal();
+    }
+
+    if (!fromAddress) {
+      const systemReward = [
+        ['Date (time)', `${getDateFromTimestamp(timestamp)} (${getTimeFromTimestamp(timestamp)})`],
+        ['Rewarded from', 'System'],
+        ['Amount', amount],
+        ['Block index', index]
+      ];
+      setModalData(systemReward);
+      return openModal();
+    }
+
+    const isTransfer = fromAddress === wallet.publicKey;
+    const normalTransaction = [
+      ['Date (time)', `${getDateFromTimestamp(timestamp)} (${getTimeFromTimestamp(timestamp)})`],
+      [isTransfer ? 'To' : 'From', isTransfer ? toAddress : fromAddress],
+      ['Amount', amount],
+      ['Block index', index]
+    ];
+    setModalData(normalTransaction);
+    openModal();
+  };
+
+  const goBack = () => router.push('/');
 
   const renderHistory =
     transactions.length ? transactions.map((transaction) => {
-      if (!transaction.fromAddress) {
+      const { toAddress, amount, timestamp, fromAddress } = transaction;
+
+      if (!fromAddress) {
         return (
-          <div key={transaction.toAddress} className={classNames(css.transactionCard, css.reward)}>
-            <img alt={transaction.toAddress} src={IMAGE_URL.REWARD}/>
+          <div
+            key={toAddress}
+            onClick={() => openModalWithTransaction(transaction)}
+            className={classNames(css.transactionCard, css.reward)}
+          >
+            <img alt={toAddress} src={IMAGE_URL.REWARD}/>
 
             <div className={css.info}>
-              <div className={css.title}>
-                <h4>Rewarded {transaction.amount}</h4>
-                <p>from: The system</p>
-              </div>
-
-              <p>Date: {getDateFromTimestamp(transaction.timestamp)}</p>
+              <h3>Rewarded {amount}</h3>
+              <p>Date: {getDateFromTimestamp(timestamp)}</p>
             </div>
           </div>
         );
       }
 
-      const reseller = getResellerByPublicKey(transaction.fromAddress);
+      const reseller = getResellerByPublicKey(fromAddress);
 
       if (reseller) {
-        const { name, image } = reseller;
+        const { image } = reseller;
 
         return (
-          <div key={transaction.toAddress} className={classNames(css.transactionCard, css.reward)}>
-            <img alt={transaction.fromAddress} src={image}/>
+          <div
+            key={toAddress}
+            className={classNames(css.transactionCard, css.reward)}
+            onClick={() => openModalWithTransaction(transaction, reseller)}
+          >
+            <img alt={fromAddress} src={image}/>
 
             <div className={css.info}>
-              <div className={css.title}>
-                <h4>Rewarded {transaction.amount}</h4>
-                <p>from: {name}</p>
-              </div>
-
-              <p>Date: {getDateFromTimestamp(transaction.timestamp)}</p>
-
-              <div className={css.cta}>
-                <button className={classNames(css.button, css.dimension)}>Block location</button>
-                <button className={classNames(css.button, css.dimension)}>Sender publicKey</button>
-              </div>
+              <h4>Rewarded {amount}</h4>
+              <p>Date: {getDateFromTimestamp(timestamp)}</p>
             </div>
           </div>
         )
       }
 
-      const isTransfer = transaction.fromAddress === wallet.publicKey;
+      const isTransfer = fromAddress === wallet.publicKey;
 
       return (
-        <div key={transaction.toAddress} className={classNames(css.transactionCard)}>
-          <img alt={transaction.fromAddress} src={IMAGE_URL.USER}/>
+        <div
+          key={toAddress}
+          className={classNames(css.transactionCard)}
+          onClick={() => openModalWithTransaction(transaction)}
+        >
+          <img alt={fromAddress} src={IMAGE_URL.USER}/>
 
           <div className={css.info}>
-            <div className={css.title}>
-              <h4>{isTransfer ? 'Transferred' : 'Received'} {transaction.amount}</h4>
-              <p>{isTransfer ? 'to' : 'from'}: {transaction.toAddress}</p>
-            </div>
-
-            <p>Date: {getDateFromTimestamp(transaction.timestamp)}</p>
-
-            <div className={css.cta}>
-              <button className={classNames(css.button, css.dimension)}>Block location</button>
-              <button className={classNames(css.button, css.dimension)}>Sender publicKey</button>
-            </div>
+            <h4>{isTransfer ? 'Transferred' : 'Received'} {amount}</h4>
+            <p>Date: {getDateFromTimestamp(timestamp)}</p>
           </div>
         </div>
       )
     }) : null;
-
-  const goBack = () => router.push('/');
 
   return connected ? (
     <Fade triggerOnce duration={500}>
@@ -141,6 +189,26 @@ const TransactionHistory = ({ router }) => {
           Go back to wallet
         </button>
       </div>
+
+      <Modal id="transaction-modal" modalClassName={css.modalWrapper} isOpen={isModalOpen} transition={ModalTransition.SCALE} onBackdropClick={closeModal}>
+        <div className={css.modal}>
+          <h1>Transaction Info</h1>
+
+          <div className={css.stats}>
+            {modalData.length && modalData.map(data => (
+              <>
+                <p>{data[0]}</p>
+                <p>{data[1]}</p>
+              </>
+            ))}
+          </div>
+
+          <div className={css.cta}>
+            <button className={classNames(css.button, css.dimension)} onClick={exportTransactionToFile}>Export</button>
+            <button className={classNames(css.button, css.dimension)} onClick={closeModal}>Close</button>
+          </div>
+        </div>
+      </Modal>
     </Fade>
   ) : <SkewLoader css={emotionCss`size: 60; color: 'black'`} />;
 }
