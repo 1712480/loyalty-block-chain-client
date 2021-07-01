@@ -12,7 +12,7 @@ const initializeStore = (initialState) => {
 
   if (module.hot) {
     module.hot.accept('./reducer', () => {
-      store.replaceReducer(persistReducer(persistConfig, rootReducer))
+      store.replaceReducer(persistedReducer)
     })
   }
 
