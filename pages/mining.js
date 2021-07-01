@@ -33,7 +33,7 @@ const Mining = ({ router }) => {
 
   useEffect(() => {
     socketUpdateAll();
-    worker.current = new Worker(new URL('mine.worker.js', import.meta.url));
+    worker.current = new Worker(new URL('../public/mine.worker', import.meta.url));
 
     worker.current.onmessage = (event) => {
       const message = get(event, 'data[0]', '');

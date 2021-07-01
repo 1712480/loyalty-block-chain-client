@@ -1,7 +1,4 @@
 module.exports = {
-  future: {
-    webpack5: true,
-  },
   webpack: (config, { dev, isServer, webpack }) => {
     const { rules } = config.module;
     const styleRules = (rules.find((m) => m.oneOf && m.oneOf.find(({ test: reg }) => reg.test('file.css'))) || {}).oneOf;
@@ -22,12 +19,7 @@ module.exports = {
 
     console.log(`Webpack version: ${webpack.version}`);
 
-    config.output.hotUpdateMainFilename =
-      "static/webpack/[fullhash].[runtime].hot-update.json";
-
-    if (!isServer) {
-      config.resolve.fallback.fs = false;
-    }
+    config.output.hotUpdateMainFilename = "static/webpack/[fullhash].[runtime].hot-update.json";
 
     return config;
   },
