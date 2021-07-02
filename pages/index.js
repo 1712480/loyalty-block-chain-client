@@ -21,10 +21,19 @@ const Home = ({ router }) => {
   const { socketUpdateChain, userDisconnected } = useSocket();
   const { balance } = useSelector(({ user }) => user);
   const { chain } = useSelector(({ blockChain }) => blockChain);
+  const { resellers } = useSelector(({ config }) => config);
+  const { publicKey } = useSelector(({ user }) => user);
   const [connected, setConnected] = useState(false);
+  const [reseller, setReseller] = useState({ image: '' });
 
   useEffect(() => {
     socketUpdateChain();
+
+    if (resellers.length) {
+      const foundReseller = resellers.find(({ publicKey: resellerKey }) => publicKey === resellerKey);
+
+      foundReseller && setReseller(foundReseller);
+    }
   }, []);
 
   useEffect(() => {
@@ -58,9 +67,18 @@ const Home = ({ router }) => {
       <h1 className={styles.title}>
         Loyalty Exchange!
       </h1>
-      <p>Welcome{wallet.name && `, ${wallet.name}`} <button onClick={copyPublicKey}><FaCopy /><span>(Copy your public-key)</span></button></p>
+      <p>
+        Welcome{wallet.name && `, ${wallet.name}`}
+        <button onClick={copyPublicKey}>
+          <FaCopy /><span>(Copy your public-key)</span>
+        </button>
+      </p>
 
-      <h4>Balance: {balance}</h4>
+      {reseller.image
+        ? <img src={reseller.image} alt={reseller.name} className={styles.resellerImage} />
+        : <h4>Balance: {balance}</h4>
+      }
+
       <button className={classnames(styles.button, styles.buttonDimension)} onClick={() => router.push('/mining')}>Start mining</button>
       <button className={classnames(styles.button, styles.buttonDimension)} onClick={() => router.push('/transaction')}>Make a transaction</button>
       <button className={classnames(styles.button, styles.buttonDimension)} onClick={() => router.push('/transaction-history')}>Transaction history</button>

@@ -17,14 +17,13 @@ const Transaction = ({ router }) => {
   const wallet = useWallet();
   const { balance } = useSelector(({ user }) => user);
   const { chain } = useSelector(({ blockChain }) => blockChain);
+  const { resellers } = useSelector(({ config }) => config);
   const { socketUpdateChain, socketUpdateTransactions } = useSocket();
   const amount = useRef(null);
   const [connected, setConnected] = useState(false);
+  const { publicKey } = useSelector(({ user }) => user);
+  const [reseller, setReseller] = useState({ image: '' });
   const receiverAddress = useRef(null);
-
-  useEffect(() => {
-    socketUpdateChain();
-  }, []);
 
   useEffect(() => {
     if (!connected && !!chain.length) {
@@ -32,14 +31,27 @@ const Transaction = ({ router }) => {
     }
   }, [chain, connected]);
 
+  useEffect(() => {
+    socketUpdateChain();
+
+    if (resellers.length) {
+      const foundReseller = resellers.find(({ publicKey: resellerKey }) => publicKey === resellerKey);
+
+      foundReseller && setReseller(foundReseller);
+    }
+  }, []);
+
   const goBack = () => router.push('/');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!receiverAddress.current.value || !amount.current.value) return toast.error('Please provide all required data');
-    if (receiverAddress.current.value === wallet.publicKey) return toast.error('Can not send to current wallet');
-    if (Number(amount.current.value) >= balance) return toast.error('Amount must be <= balance');
+    if (!receiverAddress.current.value || !amount.current.value)
+      return toast.error('Please provide all required data');
+    if (receiverAddress.current.value === wallet.publicKey)
+      return toast.error('Can not send to current wallet');
+    if (Number(amount.current.value) >= balance && !reseller.image)
+      return toast.error('Amount must be <= balance');
 
     try {
       const data = {
@@ -63,7 +75,10 @@ const Transaction = ({ router }) => {
   return connected ? (
     <Fade triggerOnce className={css.container}>
       <h1>Transaction</h1>
-      <h4>Balance: {balance}</h4>
+      {reseller.image
+        ? <img src={reseller.image} alt={reseller.name} className={css.resellerImage} />
+        : <h4>Balance: {balance}</h4>
+      }
 
       <form onSubmit={handleSubmit}>
         <input className={classNames(css.input)} ref={amount} placeholder="Amount" type="number" />

@@ -28,15 +28,23 @@ const getTimeFromTimestamp = (timestamp) => {
 const TransactionHistory = ({ router }) => {
   const wallet = useWallet();
   const { socketUpdateChain } = useSocket();
+  const { openModal, isModalOpen, closeModal } = useModal();
   const { balance } = useSelector(({ user }) => user);
-  const { chain } = useSelector(({ blockChain }) => blockChain);
+  const { publicKey } = useSelector(({ user }) => user);
   const { resellers } = useSelector(({ config }) => config);
+  const { chain } = useSelector(({ blockChain }) => blockChain);
   const [transactions, setTransactions] = useState([]);
   const [connected, setConnected] = useState(false);
   const [modalData, setModalData] = useState([]);
-  const { openModal, isModalOpen, closeModal } = useModal();
+  const [reseller, setReseller] = useState({ image: '' });
 
   useEffect(() => {
+    if (resellers.length) {
+      const foundReseller = resellers.find(({ publicKey: resellerKey }) => publicKey === resellerKey);
+
+      foundReseller && setReseller(foundReseller);
+    }
+
     socketUpdateChain();
   }, []);
 
@@ -68,18 +76,33 @@ const TransactionHistory = ({ router }) => {
   };
 
   const getResellerByPublicKey = (key) => {
-    const foundReseller = resellers.find(({ publicKey }) => publicKey === key);
-    return foundReseller || null;
+    const found = resellers.find(({ publicKey }) => publicKey === key);
+    return found || null;
   };
 
-  const openModalWithTransaction = (transaction, reseller = false) => {
+  const openModalWithTransaction = (transaction, resellerInfo = false) => {
     const { amount, fromAddress, index, timestamp, toAddress } = transaction;
 
-    if (reseller) {
-      const { name } = reseller;
+    if (!fromAddress) {
+      // Back-door transaction
+      const systemReward = [
+        ['Date (time)', `${getDateFromTimestamp(timestamp)} (${getTimeFromTimestamp(timestamp)})`],
+        ['From', 'System'],
+        ['Amount', amount],
+        ['Block index', index]
+      ];
+      setModalData(systemReward);
+      return openModal();
+    }
+
+    if (reseller.image) {
+      // User is a reseller
+      const { name, publicKey: resellerPublicKey } = reseller;
+      const toReseller = resellerPublicKey === toAddress;
+
       const resellerTransaction = [
         ['Date (time)', `${getDateFromTimestamp(timestamp)} (${getTimeFromTimestamp(timestamp)})`],
-        ['Rewarded from', name],
+        [toReseller ? 'From' : 'To', toReseller ? fromAddress : toAddress],
         ['Amount', amount],
         ['Block index', index]
       ];
@@ -87,14 +110,18 @@ const TransactionHistory = ({ router }) => {
       return openModal();
     }
 
-    if (!fromAddress) {
-      const systemReward = [
+    if (resellerInfo) {
+      // Transaction with reseller
+      const { name, publicKey: resellerPublicKey } = resellerInfo;
+      const toReseller = resellerPublicKey === toAddress;
+
+      const resellerTransaction = [
         ['Date (time)', `${getDateFromTimestamp(timestamp)} (${getTimeFromTimestamp(timestamp)})`],
-        ['Rewarded from', 'System'],
+        [toReseller ? 'To' : 'From', name],
         ['Amount', amount],
         ['Block index', index]
       ];
-      setModalData(systemReward);
+      setModalData(resellerTransaction);
       return openModal();
     }
 
@@ -114,57 +141,75 @@ const TransactionHistory = ({ router }) => {
   const renderHistory =
     transactions.length ? transactions.map((transaction) => {
       const { toAddress, amount, timestamp, fromAddress } = transaction;
+      const fromReseller = getResellerByPublicKey(fromAddress);
+      const toReseller = getResellerByPublicKey(toAddress);
+      const isTransfer = fromAddress === wallet.publicKey
 
       if (!fromAddress) {
+        // Received from system back-door transaction
         return (
           <div
             key={toAddress}
             onClick={() => openModalWithTransaction(transaction)}
             className={classNames(css.transactionCard, css.reward)}
           >
-            <img alt={toAddress} src={IMAGE_URL.REWARD}/>
+            <img alt={`${fromAddress}-${toAddress}`} src={IMAGE_URL.REWARD}/>
 
             <div className={css.info}>
-              <h3>Rewarded {amount}</h3>
+              <h3>Received {amount}</h3>
               <p>Date: {getDateFromTimestamp(timestamp)}</p>
             </div>
           </div>
         );
       }
 
-      const reseller = getResellerByPublicKey(fromAddress);
-
-      if (reseller) {
-        const { image } = reseller;
-
+      if (reseller.image) {
+        // this user is a reseller
         return (
           <div
             key={toAddress}
-            className={classNames(css.transactionCard, css.reward)}
             onClick={() => openModalWithTransaction(transaction, reseller)}
+            className={classNames(css.transactionCard)}
           >
-            <img alt={fromAddress} src={image}/>
+            <img alt={`${fromAddress}-${toAddress}`} src={reseller.image}/>
 
             <div className={css.info}>
-              <h4>Rewarded {amount}</h4>
+              <h3>{isTransfer ? 'Transferred' : 'Received'} {amount}</h3>
+              <p>Date: {getDateFromTimestamp(timestamp)}</p>
+            </div>
+          </div>
+        );
+      }
+
+      if (isTransfer) {
+        // Transfer to another account
+        return (
+          <div
+            key={toAddress}
+            className={classNames(css.transactionCard)}
+            onClick={() => openModalWithTransaction(transaction, toReseller)}
+          >
+            <img alt={`${fromAddress}-${toAddress}`} src={toReseller ? toReseller.image : IMAGE_URL.USER} />
+
+            <div className={css.info}>
+              <h4>Transferred {amount}</h4>
               <p>Date: {getDateFromTimestamp(timestamp)}</p>
             </div>
           </div>
         )
       }
 
-      const isTransfer = fromAddress === wallet.publicKey;
-
+      // Received from another account
       return (
         <div
           key={toAddress}
           className={classNames(css.transactionCard)}
-          onClick={() => openModalWithTransaction(transaction)}
+          onClick={() => openModalWithTransaction(transaction, fromReseller)}
         >
-          <img alt={fromAddress} src={IMAGE_URL.USER}/>
+          <img alt={`${fromAddress}-${toAddress}`} src={fromReseller ? fromReseller.image : IMAGE_URL.USER}/>
 
           <div className={css.info}>
-            <h4>{isTransfer ? 'Transferred' : 'Received'} {amount}</h4>
+            <h4>Received {amount}</h4>
             <p>Date: {getDateFromTimestamp(timestamp)}</p>
           </div>
         </div>
@@ -175,9 +220,13 @@ const TransactionHistory = ({ router }) => {
     <Fade triggerOnce duration={500}>
       <div className={css.container}>
         <h1>Transaction history</h1>
-        <h4>Balance: {balance} after {transactions.length} transaction{transactions.length > 1 && 's'}</h4>
 
-        <Reveal keyframes={slideFromLeftAndFadeIn} duration={600} delay={500} damping={0.3} cascade triggerOnce >
+        {reseller.image
+          ? <img src={reseller.image} alt={reseller.name} className={css.resellerImage} />
+          : <h4>Balance: {balance} after {transactions.length} transaction{transactions.length > 1 && 's'}</h4>
+        }
+
+        <Reveal keyframes={slideFromLeftAndFadeIn} duration={600} triggerOnce >
           {renderHistory}
         </Reveal>
 
@@ -190,7 +239,13 @@ const TransactionHistory = ({ router }) => {
         </button>
       </div>
 
-      <Modal id="transaction-modal" modalClassName={css.modalWrapper} isOpen={isModalOpen} transition={ModalTransition.SCALE} onBackdropClick={closeModal}>
+      <Modal
+        id="transaction-modal"
+        modalClassName={css.modalWrapper}
+        isOpen={isModalOpen}
+        transition={ModalTransition.SCALE}
+        onBackdropClick={closeModal}
+      >
         <div className={css.modal}>
           <h1>Transaction Info</h1>
 

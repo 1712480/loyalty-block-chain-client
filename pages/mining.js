@@ -92,7 +92,7 @@ const Mining = ({ router }) => {
 
   const handleMining = () => {
     if (chain.length && pendingTransactions.length) {
-      const rewardTransaction = new Transaction(null, credential.publicKey, 1);
+      const rewardTransaction = new Transaction('' , credential.publicKey, 1);
 
       setAnimationName(css.fadeIn);
       worker.current.postMessage([WORKER_EVENT.START_MINING, {
